@@ -308,3 +308,78 @@ print(response.text)
 > - `apiKeyString` 값은 반드시 `"ApiKey "` 접두사를 포함해야 한다.
 > - 텍스트 입력만 지원 (멀티모달 입력 불가).
 > - 최대 10개 데이터 소스를 동시에 사용할 수 있다.
+
+---
+
+## § 5. Custom Search API 그라운딩
+
+### 언제: 자체 검색 API를 그라운딩 소스로 연결할 때
+
+```python
+from google import genai
+from google.genai.types import (
+    ExternalApi,
+    GenerateContentConfig,
+    HttpOptions,
+    Retrieval,
+    Tool,
+)
+
+client = genai.Client(http_options=HttpOptions(api_version="v1"))
+
+API_ENDPOINT = "https://your-api-gateway.example.com/v0/search"
+API_KEY = "your-api-key"
+
+response = client.models.generate_content(
+    model="gemini-2.5-flash",
+    contents="What are the return policy details?",
+    config=GenerateContentConfig(
+        tools=[
+            Tool(
+                retrieval=Retrieval(
+                    external_api=ExternalApi(
+                        api_spec="SIMPLE_SEARCH",   # 현재 유일한 허용 값
+                        endpoint=API_ENDPOINT,
+                        api_auth={
+                            "apiKeyConfig": {
+                                "apiKeyString": API_KEY
+                            }
+                        },
+                    )
+                )
+            )
+        ],
+    ),
+)
+
+print(response.text)
+```
+
+### 자체 API 계약 (필수 준수)
+
+Gemini가 POST로 호출하는 요청 형식:
+```json
+{ "query": "검색어 문자열" }
+```
+
+응답으로 반환해야 하는 형식:
+```json
+[
+  { "snippet": "관련 정보 텍스트", "uri": "출처 URL" },
+  { "snippet": "두 번째 정보", "uri": "출처2 URL" }
+]
+```
+결과가 없으면 빈 배열 `[]` 반환.
+
+### ExternalApi 파라미터
+
+| 파라미터 | 설명 |
+|---------|------|
+| `api_spec` | 반드시 `"SIMPLE_SEARCH"` |
+| `endpoint` | API Gateway 엔드포인트 URL |
+| `apiKeyConfig.apiKeyString` | Gemini가 `?key=` 쿼리 파라미터로 전달할 API 키 |
+
+> **원칙:**
+> - API 응답 지연이 길어지면 전체 Gemini 응답 시간이 증가한다.
+> - `snippet`의 품질이 그라운딩 응답 품질을 직접 결정한다.
+> - 인증은 API 키 방식만 지원된다.
