@@ -1,6 +1,6 @@
 # vertexai-skills
 
-Vertex AI 개발을 위한 **Gemini CLI Skills** 모음. `google-genai` Python SDK 기준으로 LLM 텍스트 생성, 이미지 생성/편집, 비디오 생성의 올바른 코드 패턴과 레퍼런스를 제공한다.
+Vertex AI 개발을 위한 **Gemini CLI Skills** 모음. `google-genai` Python SDK 기준으로 LLM, 이미지, 비디오, 사고 모델, 그라운딩의 올바른 코드 패턴과 레퍼런스를 제공한다.
 
 ---
 
@@ -11,6 +11,8 @@ Vertex AI 개발을 위한 **Gemini CLI Skills** 모음. `google-genai` Python S
 | `vertexai-skills` | `skills/vertexai-skills/SKILL.md` | 텍스트 생성, 시스템 지시, 함수 호출, 구조화된 출력, 생성 파라미터, 코드 실행 |
 | `image-skills` | `skills/image-skills/SKILL.md` | Imagen 4 이미지 생성, Gemini 이미지 생성/편집, Best Practices, Limitations, Safety |
 | `video-skills` | `skills/video-skills/SKILL.md` | Veo 텍스트→비디오, 이미지→비디오, 프레임 보간, 비디오 연장, 고급 기법, Safety |
+| `thinking-skills` | `skills/thinking-skills/SKILL.md` | Thinking Budget, Thinking Level, Thought 요약, Thought Signatures |
+| `grounding-skills` | `skills/grounding-skills/SKILL.md` | Google Search, Maps, Vertex AI Search, Elasticsearch, Custom API, Parallel, Enterprise Web |
 
 ---
 
@@ -63,9 +65,11 @@ cd ~/sandbox/vertexai-skills
 mkdir -p ~/.gemini/skills
 
 # 심볼릭 링크 생성
-ln -s "$(pwd)/skills/vertexai-skills" ~/.gemini/skills/vertexai-skills
-ln -s "$(pwd)/skills/image-skills"    ~/.gemini/skills/image-skills
-ln -s "$(pwd)/skills/video-skills"    ~/.gemini/skills/video-skills
+ln -s "$(pwd)/skills/vertexai-skills"  ~/.gemini/skills/vertexai-skills
+ln -s "$(pwd)/skills/image-skills"     ~/.gemini/skills/image-skills
+ln -s "$(pwd)/skills/video-skills"     ~/.gemini/skills/video-skills
+ln -s "$(pwd)/skills/thinking-skills"  ~/.gemini/skills/thinking-skills
+ln -s "$(pwd)/skills/grounding-skills" ~/.gemini/skills/grounding-skills
 ```
 
 ### 설치 확인
@@ -76,9 +80,11 @@ ls -la ~/.gemini/skills/
 
 정상 출력 예시:
 ```
-image-skills    -> /home/user/sandbox/vertexai-skills/skills/image-skills
-vertexai-skills -> /home/user/sandbox/vertexai-skills/skills/vertexai-skills
-video-skills    -> /home/user/sandbox/vertexai-skills/skills/video-skills
+grounding-skills -> /home/user/sandbox/vertexai-skills/skills/grounding-skills
+image-skills     -> /home/user/sandbox/vertexai-skills/skills/image-skills
+thinking-skills  -> /home/user/sandbox/vertexai-skills/skills/thinking-skills
+vertexai-skills  -> /home/user/sandbox/vertexai-skills/skills/vertexai-skills
+video-skills     -> /home/user/sandbox/vertexai-skills/skills/video-skills
 ```
 
 ---
@@ -116,6 +122,26 @@ video-skills    -> /home/user/sandbox/vertexai-skills/skills/video-skills
 | `text to video`, `텍스트로 영상` | "프롬프트로 비디오 생성해줘" |
 | `image to video`, `이미지로 영상` | "이미지를 비디오로 변환하는 코드 써줘" |
 | `extend video`, `영상 연장` | "비디오 연장하는 방법 알려줘" |
+
+### thinking-skills 트리거
+
+| 트리거 | 예시 요청 |
+|--------|---------|
+| `ThinkingConfig` 임포트 | "이 코드에 사고 예산을 설정해줘" |
+| `thinking budget`, `생각 예산` | "thinking_budget으로 추론 깊이 제어하는 법 알려줘" |
+| `thinking level`, `사고 모드` | "Gemini 3에서 ThinkingLevel.HIGH 사용하는 코드 써줘" |
+| `thought signatures`, `사고 시그니처` | "함수 호출 시 Thought Signatures 처리하는 방법" |
+| `reasoning model`, `추론 모델` | "추론 모델로 수학 문제 풀게 해줘" |
+
+### grounding-skills 트리거
+
+| 트리거 | 예시 요청 |
+|--------|---------|
+| `GoogleSearch` 임포트 | "이 코드에 Google Search 그라운딩 추가해줘" |
+| `grounding`, `그라운딩` | "그라운딩으로 환각을 줄이는 방법 알려줘" |
+| `Vertex AI Search`, `버텍스 검색` | "내 문서로 RAG 구성하는 코드 써줘" |
+| `Elasticsearch grounding` | "ES 인덱스를 그라운딩 소스로 쓰는 코드 써줘" |
+| `enterprise web search` | "컴플라이언스 환경에서 웹 그라운딩 사용하는 방법" |
 
 ---
 
@@ -166,6 +192,31 @@ video-skills    -> /home/user/sandbox/vertexai-skills/skills/video-skills
 § 7. Responsible AI & Safety — 금지 콘텐츠, operation.error 처리
 ```
 
+### thinking-skills
+
+```
+환경 설정
+  - 모델 선택 가이드 (thinking_budget vs thinking_level)
+§ 1. Thinking Budget 설정  — ThinkingConfig(thinking_budget=N), 0/-1 옵션
+§ 2. Thinking Level 설정   — ThinkingLevel.MINIMAL/LOW/MEDIUM/HIGH (Gemini 3+)
+§ 3. Thought 요약 보기     — include_thoughts=True, part.thought 분기
+§ 4. Thought Signatures    — 함수 호출 멀티턴에서 사고 연속성 유지
+```
+
+### grounding-skills
+
+```
+환경 설정
+  - 7가지 그라운딩 방식 선택 가이드
+§ 1. Google Search 그라운딩       — GoogleSearch, Dynamic Retrieval
+§ 2. Google Maps 그라운딩         — GoogleMaps, LatLng, ToolConfig
+§ 3. Vertex AI Search 그라운딩    — Retrieval + VertexAISearch(datastore=...)
+§ 4. Elasticsearch 그라운딩       — ExternalApi(api_spec="ELASTIC_SEARCH")
+§ 5. Custom Search API 그라운딩   — ExternalApi(api_spec="SIMPLE_SEARCH"), API 계약
+§ 6. Parallel Web Search 그라운딩 — REST only, parallelAiSearch
+§ 7. Enterprise Web Search 그라운딩 — EnterpriseWebSearch(), 컴플라이언스 환경
+```
+
 ---
 
 ## 주요 모델 레퍼런스
@@ -199,7 +250,7 @@ video-skills    -> /home/user/sandbox/vertexai-skills/skills/video-skills
 
 ## 공통 클라이언트 초기화 패턴
 
-세 스킬 모두 동일한 초기화 패턴을 사용한다:
+모든 스킬이 동일한 초기화 패턴을 사용한다:
 
 ```python
 from google import genai
@@ -231,8 +282,12 @@ vertexai-skills/
 │   │   └── SKILL.md          # LLM 텍스트 생성 레퍼런스
 │   ├── image-skills/
 │   │   └── SKILL.md          # 이미지 생성/편집 레퍼런스
-│   └── video-skills/
-│       └── SKILL.md          # 비디오 생성 레퍼런스
+│   ├── video-skills/
+│   │   └── SKILL.md          # 비디오 생성 레퍼런스
+│   ├── thinking-skills/
+│   │   └── SKILL.md          # 사고 모델 제어 레퍼런스
+│   └── grounding-skills/
+│       └── SKILL.md          # 그라운딩 레퍼런스 (7가지 소스)
 └── docs/
     └── superpowers/
         ├── specs/            # 설계 명세서
@@ -242,6 +297,8 @@ vertexai-skills/
 ~/.gemini/skills/vertexai-skills  →  skills/vertexai-skills/
 ~/.gemini/skills/image-skills     →  skills/image-skills/
 ~/.gemini/skills/video-skills     →  skills/video-skills/
+~/.gemini/skills/thinking-skills  →  skills/thinking-skills/
+~/.gemini/skills/grounding-skills →  skills/grounding-skills/
 ```
 
 ---
