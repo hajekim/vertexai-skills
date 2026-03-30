@@ -103,17 +103,16 @@ print(f"Total:    {response.usage_metadata.total_token_count}")
 
 ```python
 from google import genai
-from google.genai import types
-from google.genai.types import HttpOptions
+from google.genai.types import GenerateContentConfig, HttpOptions, ThinkingConfig, ThinkingLevel
 
 client = genai.Client(http_options=HttpOptions(api_version="v1"))
 
 response = client.models.generate_content(
     model="gemini-3.1-pro",
     contents="How does AI work?",
-    config=types.GenerateContentConfig(
-        thinking_config=types.ThinkingConfig(
-            thinking_level=types.ThinkingLevel.HIGH,
+    config=GenerateContentConfig(
+        thinking_config=ThinkingConfig(
+            thinking_level=ThinkingLevel.HIGH,
         ),
     ),
 )

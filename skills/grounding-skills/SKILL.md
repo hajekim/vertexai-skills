@@ -38,7 +38,7 @@ client = genai.Client(http_options=HttpOptions(api_version="v1"))
 | Google Search | `GoogleSearch` | 최신 공개 웹 데이터 |
 | Google Maps | `GoogleMaps` | 장소/지리 정보 |
 | Vertex AI Search | `VertexAISearch` (via `Retrieval`) | 내 문서/웹사이트 데이터 |
-| Elasticsearch | `Elasticsearch` (via `Retrieval`) | 기존 ES 인덱스 |
+| Elasticsearch | `ExternalApi` (via `Retrieval`) | 기존 ES 인덱스 |
 | Custom Search API | `ExternalApi` (via `Retrieval`) | 자체 검색 API |
 | Parallel Web Search | REST only (`parallelAiSearch`) | LLM 최적화 웹 인덱스 |
 | Enterprise Web Search | `EnterpriseWebSearch` | 컴플라이언스 규제 환경 |
@@ -85,7 +85,10 @@ for chunk in response.candidates[0].grounding_metadata.grounding_chunks:
 ### Dynamic Retrieval (조건부 그라운딩)
 
 ```python
-from google.genai.types import DynamicRetrievalConfig, GoogleSearch, Tool
+from google import genai
+from google.genai.types import DynamicRetrievalConfig, GenerateContentConfig, GoogleSearch, HttpOptions, Tool
+
+client = genai.Client(http_options=HttpOptions(api_version="v1"))
 
 response = client.models.generate_content(
     model="gemini-2.5-flash",
@@ -125,12 +128,14 @@ response = client.models.generate_content(
 
 ```python
 from google import genai
-from google.genai import types
 from google.genai.types import (
     GenerateContentConfig,
     GoogleMaps,
     HttpOptions,
+    LatLng,
+    RetrievalConfig,
     Tool,
+    ToolConfig,
 )
 
 client = genai.Client(http_options=HttpOptions(api_version="v1"))
@@ -144,9 +149,9 @@ response = client.models.generate_content(
                 enable_widget=False,   # True: 지도 위젯 토큰 반환
             ))
         ],
-        tool_config=types.ToolConfig(
-            retrieval_config=types.RetrievalConfig(
-                lat_lng=types.LatLng(
+        tool_config=ToolConfig(
+            retrieval_config=RetrievalConfig(
+                lat_lng=LatLng(
                     latitude=37.5665,    # 서울 위도
                     longitude=126.9780,  # 서울 경도
                 ),
@@ -249,7 +254,7 @@ gcloud projects add-iam-policy-binding PROJECT_ID \
 ```python
 from google import genai
 from google.genai.types import (
-    Elasticsearch,
+    ExternalApi,
     GenerateContentConfig,
     HttpOptions,
     Retrieval,
@@ -270,7 +275,7 @@ response = client.models.generate_content(
         tools=[
             Tool(
                 retrieval=Retrieval(
-                    external_api=Elasticsearch(
+                    external_api=ExternalApi(
                         api_spec="ELASTIC_SEARCH",
                         endpoint=ES_ENDPOINT,
                         api_auth={
@@ -281,7 +286,7 @@ response = client.models.generate_content(
                         elastic_search_params={
                             "index": INDEX_NAME,
                             "searchTemplate": SEARCH_TEMPLATE,
-                            "numHits": 5,            # 반환할 결과 수
+                            "numHits": 5,
                         },
                     )
                 )
@@ -295,14 +300,14 @@ print(response.text)
 
 ### Elasticsearch 파라미터
 
-| 파라미터 | 설명 |
-|---------|------|
-| `api_spec` | 반드시 `"ELASTIC_SEARCH"` |
-| `endpoint` | Elasticsearch 클러스터 URL |
-| `apiKeyString` | 형식: `"ApiKey <your-key>"` — 접두사 `"ApiKey "` 필수 |
-| `index` | 검색할 인덱스 이름 |
-| `searchTemplate` | Elasticsearch 검색 템플릿 이름 |
-| `numHits` | 반환할 결과 수 |
+| 파라미터 | 위치 | 설명 |
+|---------|------|------|
+| `api_spec` | `ExternalApi` | 반드시 `"ELASTIC_SEARCH"` |
+| `endpoint` | `ExternalApi` | Elasticsearch 클러스터 URL |
+| `api_auth.apiKeyConfig.apiKeyString` | `ExternalApi` | 형식: `"ApiKey <your-key>"` — 접두사 `"ApiKey "` 필수 |
+| `elastic_search_params.index` | `ExternalApi` | 검색할 인덱스 이름 |
+| `elastic_search_params.searchTemplate` | `ExternalApi` | Elasticsearch 검색 템플릿 이름 |
+| `elastic_search_params.numHits` | `ExternalApi` | 반환할 결과 수 |
 
 > **원칙:**
 > - `apiKeyString` 값은 반드시 `"ApiKey "` 접두사를 포함해야 한다.
