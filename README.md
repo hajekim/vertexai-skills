@@ -15,7 +15,7 @@
 | `video-skills` | `skills/video-skills/SKILL.md` | Veo 텍스트→비디오, 이미지→비디오, 프레임 보간, 비디오 연장, 고급 기법, Safety |
 | `thinking-skills` | `skills/thinking-skills/SKILL.md` | Thinking Budget, Thinking Level, Thought 요약, Thought Signatures |
 | `grounding-skills` | `skills/grounding-skills/SKILL.md` | Google Search, Maps, Vertex AI Search, Elasticsearch, Custom API, Parallel, Enterprise Web |
-| `model-skills` | `skills/model-skills/SKILL.md` | 모델 라이프사이클, LLM/이미지/비디오 모델 선택, 마이그레이션 가이드 (SDK 전환, Breaking Changes) |
+| `model-skills` | `skills/model-skills/SKILL.md` | 모델 라이프사이클, LLM/이미지/비디오 모델 선택, 마이그레이션 가이드, Standard PayGo 사용량 티어/할당량/429 처리 |
 
 ---
 
@@ -157,6 +157,8 @@ video-skills     -> /home/user/sandbox/vertexai-skills/skills/video-skills
 | `deprecated model`, `retired model`, `모델 은퇴` | "1.5 모델 아직 써도 되나요?" |
 | `model migration`, `모델 마이그레이션`, `1.5 to 2.5` | "1.5에서 2.5로 마이그레이션하는 방법" |
 | `SDK migration`, `SDK 마이그레이션` | "Vertex AI SDK에서 Gen AI SDK로 전환하는 코드 써줘" |
+| `standard paygo`, `usage tier`, `TPM`, `할당량`, `429 에러` | "Standard PayGo 티어 구조 알려줘" |
+| `provisioned throughput`, `프로비전드 처리량` | "Provisioned Throughput이 필요한지 판단하는 기준이 뭔가요?" |
 
 ---
 
@@ -235,10 +237,11 @@ video-skills     -> /home/user/sandbox/vertexai-skills/skills/video-skills
 ### model-skills
 
 ```
-§ 1. LLM 모델 선택    — Stable/Deprecated 모델 표, 용도별 선택 기준, Alias 주의사항
-§ 2. 이미지 모델 선택  — Imagen vs Gemini Image, Preview 모델 구분
-§ 3. 비디오 모델 선택  — veo-3.1 권장, veo-2.0 전용 기능
-§ 4. 마이그레이션 가이드 — SDK 전환 코드, Breaking Changes, 7단계 절차, 확인사항
+§ 1. LLM 모델 선택      — Stable/Retired 모델 표, 용도별 선택 기준, Alias 주의사항
+§ 2. 이미지 모델 선택    — Imagen vs Gemini Image, Preview 모델 구분
+§ 3. 비디오 모델 선택    — veo-3.1 권장, veo-2.0 전용 기능
+§ 4. 마이그레이션 가이드  — SDK 전환 코드, Breaking Changes, 7단계 절차, 확인사항
+§ 5. Standard PayGo    — 사용량 티어(TPM), 30일 지출 기준, 429 에러 처리, Provisioned Throughput 비교
 ```
 
 ---
