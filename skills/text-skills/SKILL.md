@@ -1,49 +1,24 @@
-# Vertex AI Skills Implementation Plan
-
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-
-**Goal:** `google-genai` Python SDK로 Vertex AI를 사용하는 Gemini CLI 레퍼런스 가이드 스킬(`SKILL.md`) 작성 및 배포.
-
-**Architecture:** 단일 `SKILL.md` 파일에 환경 설정 + 6개 섹션(텍스트 생성, 시스템 지시, 함수 호출, 구조화된 출력, 생성 파라미터, 코드 실행)을 계층적으로 구성. 프로젝트 내 소스를 두고 `~/.gemini/skills/`에 심볼릭 링크로 배포.
-
-**Tech Stack:** `google-genai` Python SDK, Gemini CLI skills 시스템 (SKILL.md frontmatter)
-
 ---
-
-## File Map
-
-| 파일 | 역할 |
-|------|------|
-| `skills/vertexai-skills/SKILL.md` | 스킬 본문 (소스) |
-| `~/.gemini/skills/vertexai-skills` → `skills/vertexai-skills/` | Gemini CLI 배포용 심볼릭 링크 |
-
----
-
-## Task 1: SKILL.md 스캐폴딩 — frontmatter + 환경 설정 섹션
-
-**Files:**
-- Create: `skills/vertexai-skills/SKILL.md`
-
-- [ ] **Step 1: frontmatter + 환경 설정 섹션 작성**
-
-`skills/vertexai-skills/SKILL.md`를 아래 내용으로 생성:
-
-```markdown
----
-name: vertexai-skills
-description: Use when working with google-genai Python SDK on Vertex AI — code imports `from google import genai`, or requests involving "Vertex AI", "Gemini on Vertex", "function calling", "structured output", "code execution", "system instruction", "generation parameters". 한국어: "버텍스 AI", "함수 호출", "구조화된 출력", "코드 실행", "시스템 지시", "생성 파라미터", "제미나이 버텍스".
+name: text-skills
+description: Use when working with google-genai Python SDK on Vertex AI — code imports `from google import genai`, or requests involving "text generation", "chat", "function calling", "structured output", "code execution", "system instruction", "generation parameters". 한국어: "텍스트 생성", "함수 호출", "구조화된 출력", "코드 실행", "시스템 지시", "생성 파라미터", "채팅".
 version: 1.0.0
 ---
 
-# Vertex AI Skills — google-genai Python SDK 레퍼런스
+# Text Skills — google-genai Python SDK 레퍼런스
 
 ## 환경 설정
+
+### 라이브러리 설치
+
+```bash
+pip install --upgrade google-genai   # 최신 안정 버전: 1.69.0 (2026-03 기준)
+```
 
 ### 필수 환경변수
 
 ```bash
 export GOOGLE_CLOUD_PROJECT="your-project-id"
-export GOOGLE_CLOUD_LOCATION="us-central1"   # 또는 "global"
+export GOOGLE_CLOUD_LOCATION="us-central1"   # "global"은 일부 모델만 지원
 export GOOGLE_GENAI_USE_VERTEXAI="True"
 ```
 
@@ -56,38 +31,19 @@ from google.genai.types import HttpOptions
 client = genai.Client(http_options=HttpOptions(api_version="v1"))
 ```
 
+### 대안: 직접 프로젝트 지정
+
+```python
+client = genai.Client(
+    vertexai=True,
+    project="your-project-id",
+    location="us-central1",
+)
+```
+
 > **원칙:** `client`는 모듈 최상단에서 한 번 초기화한다. 함수마다 재생성하지 않는다.
 > 모든 설정은 `GenerateContentConfig`에 통합한다.
-```
 
-- [ ] **Step 2: 파일 존재 확인**
-
-```bash
-cat skills/vertexai-skills/SKILL.md
-```
-
-Expected: frontmatter와 환경 설정 섹션이 출력됨.
-
-- [ ] **Step 3: Commit**
-
-```bash
-git init  # 아직 git 저장소가 없는 경우
-git add skills/vertexai-skills/SKILL.md
-git commit -m "feat: scaffold vertexai-skills SKILL.md with env setup"
-```
-
----
-
-## Task 2: § 1 텍스트 생성 섹션 추가
-
-**Files:**
-- Modify: `skills/vertexai-skills/SKILL.md`
-
-- [ ] **Step 1: 텍스트 생성 섹션 추가**
-
-`SKILL.md`의 환경 설정 섹션 아래에 추가:
-
-```markdown
 ---
 
 ## § 1. 텍스트 생성
@@ -125,35 +81,7 @@ for chunk in chat.send_message_stream("Tell me more."):
 > **선택 기준:**
 > - 응답을 즉시 화면에 표시해야 하면 → 스트리밍
 > - 응답 전체를 처리한 후 사용해야 하면 → 논스트리밍
-```
 
-- [ ] **Step 2: 문법 확인**
-
-```bash
-head -80 skills/vertexai-skills/SKILL.md
-```
-
-Expected: frontmatter, 환경 설정, § 1 섹션이 순서대로 보임.
-
-- [ ] **Step 3: Commit**
-
-```bash
-git add skills/vertexai-skills/SKILL.md
-git commit -m "feat: add §1 text generation section to vertexai-skills"
-```
-
----
-
-## Task 3: § 2 시스템 지시 섹션 추가
-
-**Files:**
-- Modify: `skills/vertexai-skills/SKILL.md`
-
-- [ ] **Step 1: 시스템 지시 섹션 추가**
-
-`SKILL.md`의 § 1 아래에 추가:
-
-```markdown
 ---
 
 ## § 2. 시스템 지시 (System Instruction)
@@ -192,27 +120,7 @@ print(response.text)
 
 > **원칙:** 시스템 지시는 `GenerateContentConfig.system_instruction`에 설정한다.
 > 프롬프트 앞에 직접 붙이지 않는다.
-```
 
-- [ ] **Step 2: Commit**
-
-```bash
-git add skills/vertexai-skills/SKILL.md
-git commit -m "feat: add §2 system instruction section to vertexai-skills"
-```
-
----
-
-## Task 4: § 3 함수 호출 섹션 추가
-
-**Files:**
-- Modify: `skills/vertexai-skills/SKILL.md`
-
-- [ ] **Step 1: 함수 호출 섹션 추가**
-
-`SKILL.md`의 § 2 아래에 추가:
-
-```markdown
 ---
 
 ## § 3. 함수 호출 (Function Calling)
@@ -293,27 +201,7 @@ print(final_response.text)
 > - `response.function_calls`로 함수 호출 여부를 확인한다.
 > - 함수 결과는 반드시 `Part.from_function_response()`로 감싸서 반환한다.
 > - 한 요청에 최대 512개 함수 선언 가능.
-```
 
-- [ ] **Step 2: Commit**
-
-```bash
-git add skills/vertexai-skills/SKILL.md
-git commit -m "feat: add §3 function calling section to vertexai-skills"
-```
-
----
-
-## Task 5: § 4 구조화된 출력 섹션 추가
-
-**Files:**
-- Modify: `skills/vertexai-skills/SKILL.md`
-
-- [ ] **Step 1: 구조화된 출력 섹션 추가**
-
-`SKILL.md`의 § 3 아래에 추가:
-
-```markdown
 ---
 
 ## § 4. 구조화된 출력 (Controlled Output)
@@ -368,27 +256,7 @@ print(data)
 > - `response_mime_type`은 반드시 `"application/json"`으로 설정한다.
 > - `required` 필드를 명시해야 모델이 해당 필드를 반드시 채운다.
 > - 응답은 `json.loads(response.text)`로 파싱한다.
-```
 
-- [ ] **Step 2: Commit**
-
-```bash
-git add skills/vertexai-skills/SKILL.md
-git commit -m "feat: add §4 controlled output section to vertexai-skills"
-```
-
----
-
-## Task 6: § 5 생성 파라미터 섹션 추가
-
-**Files:**
-- Modify: `skills/vertexai-skills/SKILL.md`
-
-- [ ] **Step 1: 생성 파라미터 섹션 추가**
-
-`SKILL.md`의 § 4 아래에 추가:
-
-```markdown
 ---
 
 ## § 5. 생성 파라미터 (Generation Parameters)
@@ -430,27 +298,7 @@ print(response.text)
 
 > **원칙:** 모든 파라미터는 `GenerateContentConfig`에 한 번에 설정한다.
 > `temperature`와 `top_p`는 함께 사용 시 상호작용하므로 하나씩 조정한다.
-```
 
-- [ ] **Step 2: Commit**
-
-```bash
-git add skills/vertexai-skills/SKILL.md
-git commit -m "feat: add §5 generation parameters section to vertexai-skills"
-```
-
----
-
-## Task 7: § 6 코드 실행 섹션 추가
-
-**Files:**
-- Modify: `skills/vertexai-skills/SKILL.md`
-
-- [ ] **Step 1: 코드 실행 섹션 추가**
-
-`SKILL.md`의 § 5 아래에 추가:
-
-```markdown
 ---
 
 ## § 6. 코드 실행 (Code Execution)
@@ -502,73 +350,3 @@ print(response.text)
 | 단일 요청 완결 | O | X (루프 필요) |
 
 > **원칙:** 외부 서비스 연동이 필요 없는 순수 계산/데이터 처리는 Code Execution을 우선 사용한다.
-```
-
-- [ ] **Step 2: Commit**
-
-```bash
-git add skills/vertexai-skills/SKILL.md
-git commit -m "feat: add §6 code execution section to vertexai-skills"
-```
-
----
-
-## Task 8: 심볼릭 링크 생성 및 최종 검증
-
-**Files:**
-- Symlink: `~/.gemini/skills/vertexai-skills` → `<project>/skills/vertexai-skills/`
-
-- [ ] **Step 1: 프로젝트 절대 경로 확인**
-
-```bash
-pwd
-```
-
-Expected: `/home/ext_hajekim_google_com/sandbox/vertexai-skills` (또는 실제 경로)
-
-- [ ] **Step 2: 심볼릭 링크 생성**
-
-```bash
-ln -s /home/ext_hajekim_google_com/sandbox/vertexai-skills/skills/vertexai-skills \
-      /home/ext_hajekim_google_com/.gemini/skills/vertexai-skills
-```
-
-- [ ] **Step 3: 심볼릭 링크 확인**
-
-```bash
-ls -la ~/.gemini/skills/ | grep vertexai-skills
-```
-
-Expected: `vertexai-skills -> /home/ext_hajekim_google_com/sandbox/vertexai-skills/skills/vertexai-skills`
-
-- [ ] **Step 4: SKILL.md 접근 확인**
-
-```bash
-head -10 ~/.gemini/skills/vertexai-skills/SKILL.md
-```
-
-Expected: frontmatter (`---`, `name: vertexai-skills`, 등)가 보임.
-
-- [ ] **Step 5: 전체 섹션 구조 확인**
-
-```bash
-grep "^## " ~/.gemini/skills/vertexai-skills/SKILL.md
-```
-
-Expected:
-```
-## 환경 설정
-## § 1. 텍스트 생성
-## § 2. 시스템 지시 (System Instruction)
-## § 3. 함수 호출 (Function Calling)
-## § 4. 구조화된 출력 (Controlled Output)
-## § 5. 생성 파라미터 (Generation Parameters)
-## § 6. 코드 실행 (Code Execution)
-```
-
-- [ ] **Step 6: 최종 Commit**
-
-```bash
-git add .
-git commit -m "feat: deploy vertexai-skills via symlink to ~/.gemini/skills"
-```

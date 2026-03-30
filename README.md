@@ -1,6 +1,6 @@
 # vertexai-skills
 
-Vertex AI 개발을 위한 **Gemini CLI Skills** 모음. `google-genai` Python SDK 기준으로 LLM, 이미지, 비디오, 사고 모델, 그라운딩의 올바른 코드 패턴과 레퍼런스를 제공한다.
+Vertex AI 개발을 위한 **Gemini CLI Skills** 모음. `google-genai` Python SDK 기준으로 텍스트 생성, 이미지, 비디오, 사고 모델, 그라운딩의 올바른 코드 패턴과 레퍼런스를 제공한다.
 
 ---
 
@@ -8,7 +8,7 @@ Vertex AI 개발을 위한 **Gemini CLI Skills** 모음. `google-genai` Python S
 
 | 스킬 | 파일 | 다루는 내용 |
 |------|------|------------|
-| `vertexai-skills` | `skills/vertexai-skills/SKILL.md` | 텍스트 생성, 시스템 지시, 함수 호출, 구조화된 출력, 생성 파라미터, 코드 실행 |
+| `text-skills` | `skills/text-skills/SKILL.md` | 텍스트 생성, 시스템 지시, 함수 호출, 구조화된 출력, 생성 파라미터, 코드 실행 |
 | `image-skills` | `skills/image-skills/SKILL.md` | Imagen 4 이미지 생성, Gemini 이미지 생성/편집, Best Practices, Limitations, Safety |
 | `video-skills` | `skills/video-skills/SKILL.md` | Veo 텍스트→비디오, 이미지→비디오, 프레임 보간, 비디오 연장, 고급 기법, Safety |
 | `thinking-skills` | `skills/thinking-skills/SKILL.md` | Thinking Budget, Thinking Level, Thought 요약, Thought Signatures |
@@ -65,7 +65,7 @@ cd ~/sandbox/vertexai-skills
 mkdir -p ~/.gemini/skills
 
 # 심볼릭 링크 생성
-ln -s "$(pwd)/skills/vertexai-skills"  ~/.gemini/skills/vertexai-skills
+ln -s "$(pwd)/skills/text-skills"      ~/.gemini/skills/text-skills
 ln -s "$(pwd)/skills/image-skills"     ~/.gemini/skills/image-skills
 ln -s "$(pwd)/skills/video-skills"     ~/.gemini/skills/video-skills
 ln -s "$(pwd)/skills/thinking-skills"  ~/.gemini/skills/thinking-skills
@@ -82,8 +82,8 @@ ls -la ~/.gemini/skills/
 ```
 grounding-skills -> /home/user/sandbox/vertexai-skills/skills/grounding-skills
 image-skills     -> /home/user/sandbox/vertexai-skills/skills/image-skills
+text-skills      -> /home/user/sandbox/vertexai-skills/skills/text-skills
 thinking-skills  -> /home/user/sandbox/vertexai-skills/skills/thinking-skills
-vertexai-skills  -> /home/user/sandbox/vertexai-skills/skills/vertexai-skills
 video-skills     -> /home/user/sandbox/vertexai-skills/skills/video-skills
 ```
 
@@ -93,12 +93,12 @@ video-skills     -> /home/user/sandbox/vertexai-skills/skills/video-skills
 
 스킬은 Gemini CLI가 **자동으로 로드**한다. 별도 명령어 없이 아래 키워드로 요청하면 해당 스킬이 활성화된다.
 
-### vertexai-skills 트리거
+### text-skills 트리거
 
 | 트리거 | 예시 요청 |
 |--------|---------|
 | 코드에 `from google import genai` 포함 | "이 코드에 스트리밍을 추가해줘" |
-| `Vertex AI`, `Gemini on Vertex` | "Vertex AI로 텍스트 생성 코드 작성해줘" |
+| `text generation`, `텍스트 생성` | "텍스트 생성 코드 작성해줘" |
 | `function calling`, `함수 호출` | "날씨 API를 함수 호출로 연결하는 코드 써줘" |
 | `structured output`, `구조화된 출력` | "JSON 형식으로 응답받는 코드 써줘" |
 | `code execution`, `코드 실행` | "모델이 직접 계산하는 코드 실행 예제 써줘" |
@@ -147,7 +147,7 @@ video-skills     -> /home/user/sandbox/vertexai-skills/skills/video-skills
 
 ## 스킬 내용 구조
 
-### vertexai-skills (352줄)
+### text-skills (352줄)
 
 ```
 환경 설정
@@ -278,8 +278,8 @@ client = genai.Client(
 ```
 vertexai-skills/
 ├── skills/
-│   ├── vertexai-skills/
-│   │   └── SKILL.md          # LLM 텍스트 생성 레퍼런스
+│   ├── text-skills/
+│   │   └── SKILL.md          # 텍스트 생성 레퍼런스
 │   ├── image-skills/
 │   │   └── SKILL.md          # 이미지 생성/편집 레퍼런스
 │   ├── video-skills/
@@ -288,13 +288,11 @@ vertexai-skills/
 │   │   └── SKILL.md          # 사고 모델 제어 레퍼런스
 │   └── grounding-skills/
 │       └── SKILL.md          # 그라운딩 레퍼런스 (7가지 소스)
-└── docs/
-    └── superpowers/
-        ├── specs/            # 설계 명세서
-        └── plans/            # 구현 계획서
+├── .gitignore                 # .claude/, docs/ 제외
+└── README.md
 
 # 배포 (심볼릭 링크)
-~/.gemini/skills/vertexai-skills  →  skills/vertexai-skills/
+~/.gemini/skills/text-skills      →  skills/text-skills/
 ~/.gemini/skills/image-skills     →  skills/image-skills/
 ~/.gemini/skills/video-skills     →  skills/video-skills/
 ~/.gemini/skills/thinking-skills  →  skills/thinking-skills/

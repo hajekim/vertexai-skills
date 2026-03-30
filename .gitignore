@@ -1,0 +1,17 @@
+# Claude Code
+.claude/
+
+# Superpowers generated docs
+docs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.env
+.venv/
+venv/
