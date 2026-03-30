@@ -134,3 +134,38 @@ print(response.text)
 > - `ThinkingLevel.MINIMAL`은 Thought Signatures가 필요하며, 없으면 400 오류가 발생한다.
 > - `thinking_level`과 `thinking_budget`을 동시에 지정할 수 없다.
 > - `gemini-3.1-pro`는 사고를 비활성화할 수 없다.
+
+---
+
+## § 3. Thought 요약 보기
+
+### 언제: 모델의 사고 과정을 응답과 함께 확인할 때
+
+```python
+from google import genai
+from google.genai.types import GenerateContentConfig, HttpOptions, ThinkingConfig
+
+client = genai.Client(http_options=HttpOptions(api_version="v1"))
+
+response = client.models.generate_content(
+    model="gemini-2.5-pro",
+    contents="solve x^2 + 4x + 4 = 0",
+    config=GenerateContentConfig(
+        thinking_config=ThinkingConfig(
+            include_thoughts=True,   # 사고 요약 포함
+        ),
+    ),
+)
+
+# 최종 답변과 사고 과정 분리
+for part in response.candidates[0].content.parts:
+    if part.thought:
+        print(f"[Thought] {part.text}")
+    else:
+        print(f"[Answer]  {part.text}")
+```
+
+> **원칙:**
+> - `include_thoughts=True`는 베스트 에포트(best-effort) 기능이다 — 항상 사고 내용이 반환되지 않을 수 있다.
+> - `part.thought`가 `True`인 파트가 사고 요약, `False`인 파트가 최종 응답이다.
+> - 사고 요약은 축약본이다. 완전한 내부 사고 과정이 아니다.
