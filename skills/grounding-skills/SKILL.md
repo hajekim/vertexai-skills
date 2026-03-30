@@ -239,3 +239,72 @@ gcloud projects add-iam-policy-binding PROJECT_ID \
 > - 최대 10개 데이터 소스를 동시에 사용할 수 있다.
 > - Google Search 그라운딩과 병행 사용 가능.
 > - Gemini 2.5 이상에서는 `confidence_scores`가 제공되지 않는다.
+
+---
+
+## § 4. Elasticsearch 그라운딩
+
+### 언제: 기존 Elasticsearch 인덱스를 그라운딩 소스로 활용할 때
+
+```python
+from google import genai
+from google.genai.types import (
+    Elasticsearch,
+    GenerateContentConfig,
+    HttpOptions,
+    Retrieval,
+    Tool,
+)
+
+client = genai.Client(http_options=HttpOptions(api_version="v1"))
+
+ES_ENDPOINT = "https://your-cluster.es.io:443"
+ES_API_KEY = "your-elasticsearch-api-key"
+INDEX_NAME = "your-index"
+SEARCH_TEMPLATE = "your-search-template"
+
+response = client.models.generate_content(
+    model="gemini-2.5-flash",
+    contents="What are the main features of product X?",
+    config=GenerateContentConfig(
+        tools=[
+            Tool(
+                retrieval=Retrieval(
+                    external_api=Elasticsearch(
+                        api_spec="ELASTIC_SEARCH",
+                        endpoint=ES_ENDPOINT,
+                        api_auth={
+                            "apiKeyConfig": {
+                                "apiKeyString": f"ApiKey {ES_API_KEY}"   # "ApiKey " 접두사 필수
+                            }
+                        },
+                        elastic_search_params={
+                            "index": INDEX_NAME,
+                            "searchTemplate": SEARCH_TEMPLATE,
+                            "numHits": 5,            # 반환할 결과 수
+                        },
+                    )
+                )
+            )
+        ],
+    ),
+)
+
+print(response.text)
+```
+
+### Elasticsearch 파라미터
+
+| 파라미터 | 설명 |
+|---------|------|
+| `api_spec` | 반드시 `"ELASTIC_SEARCH"` |
+| `endpoint` | Elasticsearch 클러스터 URL |
+| `apiKeyString` | 형식: `"ApiKey <your-key>"` — 접두사 `"ApiKey "` 필수 |
+| `index` | 검색할 인덱스 이름 |
+| `searchTemplate` | Elasticsearch 검색 템플릿 이름 |
+| `numHits` | 반환할 결과 수 |
+
+> **원칙:**
+> - `apiKeyString` 값은 반드시 `"ApiKey "` 접두사를 포함해야 한다.
+> - 텍스트 입력만 지원 (멀티모달 입력 불가).
+> - 최대 10개 데이터 소스를 동시에 사용할 수 있다.
