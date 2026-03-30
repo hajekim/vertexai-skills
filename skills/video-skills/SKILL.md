@@ -49,7 +49,8 @@ output_gcs_uri = "gs://your-bucket/output/"  # 모든 생성 작업에 필요
 ```python
 import time
 
-# 작업 시작 후 완료까지 대기
+# operation = client.models.generate_videos(...)  # 작업 시작
+# 완료까지 대기
 while not operation.done:
     time.sleep(15)
     operation = client.operations.get(operation)
@@ -285,6 +286,9 @@ operation = client.models.generate_videos(
 while not operation.done:
     time.sleep(15)
     operation = client.operations.get(operation)
+
+for video in operation.result.generated_videos:
+    print(video.video.uri)
 ```
 
 | `reference_type` | 용도 | 지원 모델 |
@@ -332,6 +336,9 @@ operation = client.models.generate_videos(
 while not operation.done:
     time.sleep(15)
     operation = client.operations.get(operation)
+
+for video in operation.result.generated_videos:
+    print(video.video.uri)
 ```
 
 ### 5-3. 객체 제거 (Remove Objects)
@@ -374,6 +381,9 @@ operation = client.models.generate_videos(
 while not operation.done:
     time.sleep(15)
     operation = client.operations.get(operation)
+
+for video in operation.result.generated_videos:
+    print(video.video.uri)
 ```
 
 > **원칙:**
