@@ -494,7 +494,6 @@ vertexai-skills/
 │   │   └── SKILL.md          # 브라우저 자동화 레퍼런스
 │   └── url-context-skills/
 │       └── SKILL.md          # URL 컨텍스트 그라운딩 레퍼런스
-├── .gitignore                 # .claude/, docs/ 제외
 └── README.md
 
 # 배포 (심볼릭 링크)
