@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find ~/.claude/plugins -name *.json)",
+      "Bash(claude --version)",
+      "WebFetch(domain:docs.cloud.google.com)",
+      "Bash(curl:*)",
+      "WebSearch",
+      "Read(//home/ext_hajekim_google_com/.gemini/skills/**)",
+      "Read(//home/ext_hajekim_google_com/.gemini/**)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(ln:*)"
+    ]
+  }
+}
