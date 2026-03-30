@@ -16,6 +16,11 @@
 | `thinking-skills` | `skills/thinking-skills/SKILL.md` | Thinking Budget, Thinking Level, Thought 요약, Thought Signatures |
 | `grounding-skills` | `skills/grounding-skills/SKILL.md` | Google Search, Maps, Vertex AI Search, Elasticsearch, Custom API, Parallel, Enterprise Web |
 | `model-skills` | `skills/model-skills/SKILL.md` | 모델 라이프사이클, LLM/이미지/비디오 모델 선택, 마이그레이션 가이드, Standard PayGo 사용량 티어/할당량/429 처리 |
+| `embedding-skills` | `skills/embedding-skills/SKILL.md` | 텍스트 임베딩, Task Type 선택, 멀티모달 임베딩, 배치 임베딩 |
+| `translate-skills` | `skills/translate-skills/SKILL.md` | Translation LLM (Gemini 기반), NMT, 참조 문장 쌍, 문서 번역 |
+| `speech-skills` | `skills/speech-skills/SKILL.md` | TTS (텍스트→음성), STT/Chirp 모델 (음성→텍스트), 프로덕션 Speech API 안내 |
+| `computer-use-skills` | `skills/computer-use-skills/SKILL.md` | 브라우저 자동화, 액션 타입, 1000×1000 좌표 그리드, 안전 확인 패턴 |
+| `url-context-skills` | `skills/url-context-skills/SKILL.md` | URL 컨텍스트 그라운딩, 최대 20 URL, 검색 상태 확인, 토큰 카운팅 |
 
 ---
 
@@ -68,12 +73,17 @@ cd ~/sandbox/vertexai-skills
 mkdir -p ~/.gemini/skills
 
 # 심볼릭 링크 생성
-ln -s "$(pwd)/skills/text-skills"      ~/.gemini/skills/text-skills
-ln -s "$(pwd)/skills/image-skills"     ~/.gemini/skills/image-skills
-ln -s "$(pwd)/skills/video-skills"     ~/.gemini/skills/video-skills
-ln -s "$(pwd)/skills/thinking-skills"  ~/.gemini/skills/thinking-skills
-ln -s "$(pwd)/skills/grounding-skills" ~/.gemini/skills/grounding-skills
-ln -s "$(pwd)/skills/model-skills"     ~/.gemini/skills/model-skills
+ln -s "$(pwd)/skills/text-skills"          ~/.gemini/skills/text-skills
+ln -s "$(pwd)/skills/image-skills"         ~/.gemini/skills/image-skills
+ln -s "$(pwd)/skills/video-skills"         ~/.gemini/skills/video-skills
+ln -s "$(pwd)/skills/thinking-skills"      ~/.gemini/skills/thinking-skills
+ln -s "$(pwd)/skills/grounding-skills"     ~/.gemini/skills/grounding-skills
+ln -s "$(pwd)/skills/model-skills"         ~/.gemini/skills/model-skills
+ln -s "$(pwd)/skills/embedding-skills"     ~/.gemini/skills/embedding-skills
+ln -s "$(pwd)/skills/translate-skills"     ~/.gemini/skills/translate-skills
+ln -s "$(pwd)/skills/speech-skills"        ~/.gemini/skills/speech-skills
+ln -s "$(pwd)/skills/computer-use-skills"  ~/.gemini/skills/computer-use-skills
+ln -s "$(pwd)/skills/url-context-skills"   ~/.gemini/skills/url-context-skills
 ```
 
 ### 설치 확인
@@ -84,12 +94,17 @@ ls -la ~/.gemini/skills/
 
 정상 출력 예시:
 ```
-grounding-skills -> /home/user/sandbox/vertexai-skills/skills/grounding-skills
-image-skills     -> /home/user/sandbox/vertexai-skills/skills/image-skills
-model-skills     -> /home/user/sandbox/vertexai-skills/skills/model-skills
-text-skills      -> /home/user/sandbox/vertexai-skills/skills/text-skills
-thinking-skills  -> /home/user/sandbox/vertexai-skills/skills/thinking-skills
-video-skills     -> /home/user/sandbox/vertexai-skills/skills/video-skills
+computer-use-skills -> /home/user/sandbox/vertexai-skills/skills/computer-use-skills
+embedding-skills    -> /home/user/sandbox/vertexai-skills/skills/embedding-skills
+grounding-skills    -> /home/user/sandbox/vertexai-skills/skills/grounding-skills
+image-skills        -> /home/user/sandbox/vertexai-skills/skills/image-skills
+model-skills        -> /home/user/sandbox/vertexai-skills/skills/model-skills
+speech-skills       -> /home/user/sandbox/vertexai-skills/skills/speech-skills
+text-skills         -> /home/user/sandbox/vertexai-skills/skills/text-skills
+thinking-skills     -> /home/user/sandbox/vertexai-skills/skills/thinking-skills
+translate-skills    -> /home/user/sandbox/vertexai-skills/skills/translate-skills
+url-context-skills  -> /home/user/sandbox/vertexai-skills/skills/url-context-skills
+video-skills        -> /home/user/sandbox/vertexai-skills/skills/video-skills
 ```
 
 ---
@@ -181,6 +196,54 @@ video-skills     -> /home/user/sandbox/vertexai-skills/skills/video-skills
 | `standard paygo`, `usage tier`, `TPM`, `할당량`, `429 에러` | "Standard PayGo 티어 구조 알려줘" |
 | `provisioned throughput`, `프로비전드 처리량` | "Provisioned Throughput이 필요한지 판단하는 기준이 뭔가요?" |
 
+### embedding-skills 트리거
+
+| 트리거 | 예시 요청 |
+|--------|---------|
+| `embed_content` 임포트 | "이 임베딩 코드에 task_type을 추가해줘" |
+| `embedding`, `임베딩`, `텍스트 임베딩` | "텍스트 임베딩 코드 써줘" |
+| `vector embedding`, `벡터 임베딩` | "문서를 벡터로 변환하는 코드 만들어줘" |
+| `semantic similarity`, `의미적 유사도` | "두 문장의 유사도를 계산하는 코드 써줘" |
+| `multimodal embedding`, `멀티모달 임베딩` | "이미지와 텍스트를 같이 임베딩하는 방법" |
+| `batch embedding`, `배치 임베딩` | "30,000개 문서를 배치로 임베딩하는 방법" |
+| `task type`, `임베드` | "RETRIEVAL_QUERY와 RETRIEVAL_DOCUMENT 차이가 뭔가요?" |
+
+### translate-skills 트리거
+
+| 트리거 | 예시 요청 |
+|--------|---------|
+| `translate`, `번역`, `텍스트 번역` | "텍스트 번역하는 코드 써줘" |
+| `Translation LLM`, `cloud translate` | "Translation LLM API 사용하는 방법" |
+| `NMT`, `언어 번역` | "NMT로 100개 언어 번역하는 코드 써줘" |
+| `다국어 번역`, `자동 번역` | "한국어→영어 번역 코드 만들어줘" |
+
+### speech-skills 트리거
+
+| 트리거 | 예시 요청 |
+|--------|---------|
+| `text to speech`, `TTS`, `텍스트 음성 변환` | "TTS 코드 써줘" |
+| `speech to text`, `STT`, `음성 인식` | "Chirp 모델로 음성 인식하는 코드 써줘" |
+| `voice synthesis`, `음성 합성` | "음성 합성 API 사용 방법" |
+| `Chirp`, `오디오 변환`, `음성 전사` | "WAV 파일을 텍스트로 변환하는 코드" |
+
+### computer-use-skills 트리거
+
+| 트리거 | 예시 요청 |
+|--------|---------|
+| `ComputerUse` 임포트 | "이 코드에 컴퓨터 사용 도구를 추가해줘" |
+| `computer use`, `컴퓨터 사용` | "Gemini로 브라우저를 자동화하는 코드 써줘" |
+| `browser automation`, `브라우저 자동화` | "웹 페이지 자동 클릭하는 코드 만들어줘" |
+| `GUI automation`, `web automation` | "화면을 보고 자동으로 폼을 채우는 방법" |
+
+### url-context-skills 트리거
+
+| 트리거 | 예시 요청 |
+|--------|---------|
+| `UrlContext` 임포트 | "이 코드에 URL 컨텍스트를 추가해줘" |
+| `url context`, `URL 컨텍스트` | "URL 내용을 참조해서 답변하는 코드 써줘" |
+| `URL grounding`, `URL 그라운딩` | "특정 URL을 기반으로 요약하는 코드 만들어줘" |
+| `웹 페이지 읽기`, `링크 내용 참조` | "이 URL의 내용을 읽어서 분석해줘" |
+
 ---
 
 ## 스킬 내용 구조
@@ -263,6 +326,59 @@ video-skills     -> /home/user/sandbox/vertexai-skills/skills/video-skills
 § 3. 비디오 모델 선택    — veo-3.1 권장, veo-2.0 전용 기능
 § 4. 마이그레이션 가이드  — SDK 전환 코드, Breaking Changes, 7단계 절차, 확인사항
 § 5. Standard PayGo    — 사용량 티어(TPM), 30일 지출 기준, 429 에러 처리, Provisioned Throughput 비교
+```
+
+### embedding-skills
+
+```
+환경 설정
+  - 모델 선택 가이드 (gemini-embedding-001 / text-embedding-005 / multimodal)
+§ 1. 텍스트 임베딩       — embed_content(), EmbedContentConfig, 요청 한도
+§ 2. Task Type 선택      — 8가지 task_type 설명 및 비대칭 검색 패턴
+§ 3. 멀티모달 임베딩     — gemini-embedding-2-preview (텍스트/이미지/비디오/오디오/PDF)
+§ 4. 배치 임베딩         — BatchPredictionJob, JSONL 형식, 30,000개 한도
+```
+
+### translate-skills
+
+```
+환경 설정
+  - Translation LLM vs NMT 선택 가이드
+§ 1. Translation LLM     — REST API 호출, 참조 문장 쌍, 배치 1,024건
+§ 2. NMT                 — Cloud Translation API, 문서 번역, 비교표
+```
+
+### speech-skills
+
+```
+환경 설정
+  - Vertex AI Studio UI 전용 안내 (SDK 없음)
+§ 1. TTS                 — UI 데모 안내 + Cloud TTS API 프로덕션 코드
+§ 2. STT                 — Chirp 모델, WAV 16-bit PCM, 10MB/60s 제한
+                           + Cloud Speech-to-Text API (단문/장문)
+```
+
+### computer-use-skills
+
+```
+환경 설정
+  - Preview 기능 안내 (gemini-3-flash 전용)
+§ 1. 기본 패턴           — ComputerUse(environment=ENVIRONMENT_BROWSER), safety_acknowledgement
+§ 2. 액션 타입           — click_at, type_text_at, navigate, scroll, key_combination 등
+                           1000×1000 좌표 그리드 스케일링
+§ 3. 브라우저 자동화 루프 — Playwright 기반 멀티턴 스크린샷+액션 루프
+§ 4. 안전 요구사항       — 인간 확인 패턴, 감사 로깅, 범위 제한
+```
+
+### url-context-skills
+
+```
+환경 설정
+§ 1. 기본 URL 컨텍스트   — Tool(url_context=UrlContext()), URL을 contents에 포함
+§ 2. 다중 URL            — 최대 20개 URL 동시 참조
+§ 3. 검색 상태 확인      — url_retrieval_status (SUCCESS/FAILED)
+§ 4. Google Search 병합  — UrlContext + GoogleSearch 동시 사용
+§ 5. 지원 콘텐츠 타입    — HTML/JSON/PDF/이미지, 2단계 검색 방식, 토큰 카운팅
 ```
 
 ---
@@ -366,18 +482,33 @@ vertexai-skills/
 │   │   └── SKILL.md          # 사고 모델 제어 레퍼런스
 │   ├── grounding-skills/
 │   │   └── SKILL.md          # 그라운딩 레퍼런스 (7가지 소스)
-│   └── model-skills/
-│       └── SKILL.md          # 모델 선택 및 마이그레이션 가이드
+│   ├── model-skills/
+│   │   └── SKILL.md          # 모델 선택 및 마이그레이션 가이드
+│   ├── embedding-skills/
+│   │   └── SKILL.md          # 텍스트/멀티모달 임베딩 레퍼런스
+│   ├── translate-skills/
+│   │   └── SKILL.md          # Translation LLM / NMT 레퍼런스
+│   ├── speech-skills/
+│   │   └── SKILL.md          # TTS / STT (Chirp) 레퍼런스
+│   ├── computer-use-skills/
+│   │   └── SKILL.md          # 브라우저 자동화 레퍼런스
+│   └── url-context-skills/
+│       └── SKILL.md          # URL 컨텍스트 그라운딩 레퍼런스
 ├── .gitignore                 # .claude/, docs/ 제외
 └── README.md
 
 # 배포 (심볼릭 링크)
-~/.gemini/skills/text-skills      →  skills/text-skills/
-~/.gemini/skills/image-skills     →  skills/image-skills/
-~/.gemini/skills/video-skills     →  skills/video-skills/
-~/.gemini/skills/thinking-skills  →  skills/thinking-skills/
-~/.gemini/skills/grounding-skills →  skills/grounding-skills/
-~/.gemini/skills/model-skills     →  skills/model-skills/
+~/.gemini/skills/text-skills          →  skills/text-skills/
+~/.gemini/skills/image-skills         →  skills/image-skills/
+~/.gemini/skills/video-skills         →  skills/video-skills/
+~/.gemini/skills/thinking-skills      →  skills/thinking-skills/
+~/.gemini/skills/grounding-skills     →  skills/grounding-skills/
+~/.gemini/skills/model-skills         →  skills/model-skills/
+~/.gemini/skills/embedding-skills     →  skills/embedding-skills/
+~/.gemini/skills/translate-skills     →  skills/translate-skills/
+~/.gemini/skills/speech-skills        →  skills/speech-skills/
+~/.gemini/skills/computer-use-skills  →  skills/computer-use-skills/
+~/.gemini/skills/url-context-skills   →  skills/url-context-skills/
 ```
 
 ---
