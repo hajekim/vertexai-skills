@@ -1,4 +1,4 @@
-# vertexaistudio-skills
+# vertexai-skills
 
 **Vertex AI Studio** 기반 생성형 AI 개발을 위한 **Gemini CLI Skills** 모음. Vertex AI Studio에서 제공하는 모델(Gemini, Imagen, Veo)을 `google-genai` Python SDK로 호출할 때 필요한 올바른 코드 패턴과 레퍼런스를 제공한다.
 
@@ -96,7 +96,28 @@ video-skills     -> /home/user/sandbox/vertexai-skills/skills/video-skills
 
 ## 사용 방법
 
-스킬은 Gemini CLI가 **자동으로 로드**한다. 별도 명령어 없이 아래 키워드로 요청하면 해당 스킬이 활성화된다.
+### 작동 원리
+
+스킬은 별도 명령어 없이 **자동으로 활성화**된다. 두 가지 방식으로 트리거된다.
+
+**① 키워드 매칭** — 메시지에 트리거 키워드가 포함되면 해당 스킬이 자동 로드된다.
+
+```
+"Veo로 비디오 생성하는 코드 써줘"  →  video-skills 활성화
+"429 에러가 계속 나는데 어떻게 해?"  →  model-skills 활성화
+```
+
+**② 코드 컨텍스트** — 편집 중인 코드에 특정 import가 있으면 자동 활성화된다.
+
+| 코드 내 import | 활성화 스킬 |
+|---------------|-----------|
+| `from google import genai` | `text-skills` |
+| `ThinkingConfig` | `thinking-skills` |
+| `GoogleSearch` | `grounding-skills` |
+
+스킬이 로드되면 Gemini는 SKILL.md의 코드 패턴과 Best Practice를 참고해서 답변한다. 스킬 없이 질문하면 잘못된 API 패턴이 제안될 수 있다.
+
+---
 
 ### text-skills 트리거
 
@@ -248,7 +269,9 @@ video-skills     -> /home/user/sandbox/vertexai-skills/skills/video-skills
 
 ## 모델 선택 가이드
 
-> 참고: [Model versions and lifecycle](https://cloud.google.com/vertex-ai/generative-ai/docs/learn/model-versions) · [Migration guide](https://cloud.google.com/vertex-ai/generative-ai/docs/migrate)
+> 상세 내용은 `model-skills`를 참고한다. 아래는 빠른 참조용 요약이다.
+>
+> 참고: [Model versions and lifecycle](https://cloud.google.com/vertex-ai/generative-ai/docs/learn/model-versions) · [Migration guide](https://cloud.google.com/vertex-ai/generative-ai/docs/migrate) · [Standard PayGo](https://cloud.google.com/vertex-ai/generative-ai/docs/standard-paygo)
 
 ### 모델 라이프사이클 개념
 
