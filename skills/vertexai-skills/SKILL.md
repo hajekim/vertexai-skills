@@ -75,3 +75,42 @@ for chunk in chat.send_message_stream("Tell me more."):
 > **선택 기준:**
 > - 응답을 즉시 화면에 표시해야 하면 → 스트리밍
 > - 응답 전체를 처리한 후 사용해야 하면 → 논스트리밍
+
+---
+
+## § 2. 시스템 지시 (System Instruction)
+
+### 언제: 모델의 역할, 말투, 출력 형식을 고정해야 할 때
+
+```python
+from google import genai
+from google.genai.types import HttpOptions, GenerateContentConfig
+
+client = genai.Client(http_options=HttpOptions(api_version="v1"))
+
+response = client.models.generate_content(
+    model="gemini-2.5-flash",
+    contents="Write a haiku about the sea.",
+    config=GenerateContentConfig(
+        system_instruction="You are a poet. Always respond in Korean.",
+    ),
+)
+print(response.text)
+```
+
+### 멀티턴 채팅에서의 시스템 지시
+
+```python
+chat = client.chats.create(
+    model="gemini-2.5-flash",
+    config=GenerateContentConfig(
+        system_instruction="You are a helpful assistant that responds only in bullet points.",
+    ),
+)
+
+response = chat.send_message("What are the benefits of exercise?")
+print(response.text)
+```
+
+> **원칙:** 시스템 지시는 `GenerateContentConfig.system_instruction`에 설정한다.
+> 프롬프트 앞에 직접 붙이지 않는다.
