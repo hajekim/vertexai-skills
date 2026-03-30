@@ -243,3 +243,140 @@ for video in operation.result.generated_videos:
 > **원칙:**
 > - `Video` 객체에 `uri`(GCS)와 `mime_type="video/mp4"`를 반드시 명시한다.
 > - 프롬프트는 원본 스타일을 유지한다는 것을 명시한다.
+
+---
+
+## § 5. 고급 기법
+
+### 5-1. 레퍼런스 이미지로 스타일/캐릭터 가이드
+
+인물, 캐릭터, 제품의 외관을 일관되게 유지하거나 특정 스타일을 적용할 때:
+
+```python
+import time
+from google import genai
+from google.genai.types import (
+    GenerateVideosConfig,
+    Image,
+    VideoGenerationReferenceImage,
+)
+
+client = genai.Client()
+output_gcs_uri = "gs://your-bucket/output/"
+
+operation = client.models.generate_videos(
+    model="veo-3.1-generate-001",
+    prompt="A person walking through a sunny park, cheerful mood",
+    config=GenerateVideosConfig(
+        reference_images=[
+            VideoGenerationReferenceImage(
+                image=Image(
+                    gcs_uri="gs://your-bucket/person.png",
+                    mime_type="image/png",
+                ),
+                reference_type="asset",   # "asset": 인물/캐릭터/제품 외관 유지
+            ),
+        ],
+        aspect_ratio="16:9",
+        output_gcs_uri=output_gcs_uri,
+    ),
+)
+
+while not operation.done:
+    time.sleep(15)
+    operation = client.operations.get(operation)
+```
+
+| `reference_type` | 용도 | 지원 모델 |
+|-----------------|------|---------|
+| `"asset"` | 인물/캐릭터/제품 외관 유지 | veo-3.1 |
+| `"style"` | 영상 아트 스타일 적용 | veo-2.0 전용 |
+
+### 5-2. 객체 삽입 (Insert Objects)
+
+> **주의:** `veo-2.0-generate-001` 전용 기능
+
+```python
+import time
+from google import genai
+from google.genai.types import (
+    GenerateVideosConfig,
+    Video,
+    Image,
+    VideoGenerationMask,
+    VideoGenerationMaskMode,
+)
+
+client = genai.Client()
+output_gcs_uri = "gs://your-bucket/output/"
+
+operation = client.models.generate_videos(
+    model="veo-2.0-generate-001",
+    prompt="a sheep standing in the field",
+    video=Video(
+        uri="gs://your-bucket/input.mp4",
+        mime_type="video/mp4",
+    ),
+    config=GenerateVideosConfig(
+        mask=VideoGenerationMask(
+            image=Image(
+                gcs_uri="gs://your-bucket/mask.png",   # 삽입 위치 마스크
+                mime_type="image/png",
+            ),
+            mask_mode=VideoGenerationMaskMode.INSERT,
+        ),
+        output_gcs_uri=output_gcs_uri,
+    ),
+)
+
+while not operation.done:
+    time.sleep(15)
+    operation = client.operations.get(operation)
+```
+
+### 5-3. 객체 제거 (Remove Objects)
+
+> **주의:** `veo-2.0-generate-001` 전용 기능
+
+```python
+import time
+from google import genai
+from google.genai.types import (
+    GenerateVideosConfig,
+    Video,
+    Image,
+    VideoGenerationMask,
+    VideoGenerationMaskMode,
+)
+
+client = genai.Client()
+output_gcs_uri = "gs://your-bucket/output/"
+
+operation = client.models.generate_videos(
+    model="veo-2.0-generate-001",
+    prompt="clean background without the object",
+    video=Video(
+        uri="gs://your-bucket/input.mp4",
+        mime_type="video/mp4",
+    ),
+    config=GenerateVideosConfig(
+        mask=VideoGenerationMask(
+            image=Image(
+                gcs_uri="gs://your-bucket/mask.png",   # 제거 대상 마스크
+                mime_type="image/png",
+            ),
+            mask_mode=VideoGenerationMaskMode.REMOVE,
+        ),
+        output_gcs_uri=output_gcs_uri,
+    ),
+)
+
+while not operation.done:
+    time.sleep(15)
+    operation = client.operations.get(operation)
+```
+
+> **원칙:**
+> - 레퍼런스 이미지는 최대 3개까지 제공 가능 (asset 타입).
+> - 객체 삽입/제거는 `veo-2.0-generate-001`에서만 지원된다.
+> - 마스크 이미지는 PNG/JPEG/WebP 형식이며, 대상 영역을 흰색으로 표시한다.
