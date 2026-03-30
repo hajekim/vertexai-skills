@@ -1,6 +1,8 @@
 # vertexai-skills
 
-Vertex AI 개발을 위한 **Gemini CLI Skills** 모음. `google-genai` Python SDK 기준으로 텍스트 생성, 이미지, 비디오, 사고 모델, 그라운딩의 올바른 코드 패턴과 레퍼런스를 제공한다.
+**Vertex AI Studio** 기반 생성형 AI 개발을 위한 **Gemini CLI Skills** 모음. Vertex AI Studio에서 제공하는 모델(Gemini, Imagen, Veo)을 `google-genai` Python SDK로 호출할 때 필요한 올바른 코드 패턴과 레퍼런스를 제공한다.
+
+> **범위:** 이 스킬은 Vertex AI Studio의 생성형 AI API(`generate_content`, `generate_images`, `generate_videos`)에 집중한다. Vertex AI Pipelines, AutoML, Custom Training 등 MLOps 영역은 다루지 않는다.
 
 ---
 
