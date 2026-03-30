@@ -380,3 +380,78 @@ while not operation.done:
 > - 레퍼런스 이미지는 최대 3개까지 제공 가능 (asset 타입).
 > - 객체 삽입/제거는 `veo-2.0-generate-001`에서만 지원된다.
 > - 마스크 이미지는 PNG/JPEG/WebP 형식이며, 대상 영역을 흰색으로 표시한다.
+
+---
+
+## § 6. 프롬프트 가이드 & Best Practices
+
+### 프롬프트 7가지 구성 요소
+
+| 요소 | 설명 | 예시 |
+|------|------|------|
+| **Subject** | 주인공/대상 | `"a seasoned detective"`, `"a golden retriever"` |
+| **Action** | 동작/움직임 | `"walking slowly"`, `"leaves rustling"` |
+| **Scene** | 배경/환경 | `"foggy Victorian street at night"` |
+| **Camera angle** | 카메라 각도 | `"low-angle shot"`, `"bird's-eye view"`, `"Dutch angle"` |
+| **Camera movement** | 카메라 움직임 | `"slow pan left"`, `"dolly zoom"`, `"aerial drone shot"` |
+| **Visual style** | 시각 스타일 | `"photorealistic"`, `"anime style"`, `"cinematic lighting"` |
+| **Temporal** | 시간 효과 | `"slow motion"`, `"time-lapse"`, `"fast-paced"` |
+
+### 프롬프트 작성 원칙
+
+**구체적이고 명확하게:**
+```
+# 나쁜 예
+"a man looking sad"
+
+# 좋은 예
+"Low-angle close-up shot of a man with a somber expression, rain falling in background, cinematic lighting"
+```
+
+**대화/발화 표현:**
+```
+# 나쁜 예 (따옴표 사용)
+'A woman saying "My name is Clara"'
+
+# 좋은 예 (콜론 사용)
+"A woman says: My name is Clara"
+```
+
+**한 씬에 집중:**
+- 여러 장면을 한 프롬프트에 담지 않는다
+- 각 비디오는 단일 장면으로 제한한다
+
+**이미지→비디오 시:**
+- 소스 이미지 내용을 재설명하지 않는다
+- 추가할 **동작(motion)**만 설명한다
+
+### 프롬프트 리라이터 끄기
+
+> **주의:** `veo-2.0-generate-001`에서만 지원. Veo 3/3.1은 비활성화 불가.
+
+```python
+config=GenerateVideosConfig(
+    enhance_prompt=False,    # 기본값 True (모델이 프롬프트를 자동 개선)
+    output_gcs_uri=output_gcs_uri,
+)
+```
+
+리라이터를 끄면 출력 품질과 프롬프트 반영도가 낮아질 수 있다.
+
+### Gemini로 프롬프트 개선하기
+
+```python
+from google import genai
+from google.genai.types import GenerateContentConfig
+
+text_client = genai.Client()
+
+refined = text_client.models.generate_content(
+    model="gemini-2.5-flash",
+    contents="Refine this video prompt for Veo: 'a cat in a garden'",
+    config=GenerateContentConfig(
+        system_instruction="You are a Veo video prompt expert. Make prompts cinematic, specific, and detailed. Keep under 200 words.",
+    ),
+)
+print(refined.text)  # 개선된 프롬프트를 veo에 전달
+```
