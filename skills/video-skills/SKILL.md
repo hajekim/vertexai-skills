@@ -145,3 +145,47 @@ for video in operation.result.generated_videos:
 > - 입력 이미지는 반드시 GCS에 업로드 후 `gcs_uri`로 참조한다.
 > - 권장 해상도: 720p 이상.
 > - 프롬프트는 이미지에 추가할 **동작(motion)**만 설명한다. 이미지 내용을 재설명하지 않는다.
+
+---
+
+## § 3. 첫/마지막 프레임으로 비디오
+
+### 언제: 시작 이미지와 끝 이미지 사이의 전환을 자동 생성할 때
+
+```python
+import time
+from google import genai
+from google.genai.types import GenerateVideosConfig, Image
+
+client = genai.Client()
+output_gcs_uri = "gs://your-bucket/output/"
+
+operation = client.models.generate_videos(
+    model="veo-3.1-generate-001",
+    prompt="A smooth natural transition, cinematic feel",
+    image=Image(
+        gcs_uri="gs://your-bucket/first-frame.png",   # 시작 프레임
+        mime_type="image/png",
+    ),
+    config=GenerateVideosConfig(
+        aspect_ratio="16:9",
+        last_frame=Image(
+            gcs_uri="gs://your-bucket/last-frame.png",   # 마지막 프레임
+            mime_type="image/png",
+        ),
+        output_gcs_uri=output_gcs_uri,
+    ),
+)
+
+while not operation.done:
+    time.sleep(15)
+    operation = client.operations.get(operation)
+
+for video in operation.result.generated_videos:
+    print(video.video.uri)
+```
+
+> **원칙:**
+> - `image` (첫 프레임)은 `generate_videos()` 직접 파라미터로 전달한다.
+> - `last_frame` (마지막 프레임)은 `GenerateVideosConfig` 안에 전달한다.
+> - 두 이미지의 해상도와 비율을 일치시킨다.
