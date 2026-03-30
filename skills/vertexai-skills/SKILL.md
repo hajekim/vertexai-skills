@@ -8,6 +8,12 @@ version: 1.0.0
 
 ## 환경 설정
 
+### 라이브러리 설치
+
+```bash
+pip install --upgrade google-genai   # 최신 안정 버전: 1.69.0 (2026-03 기준)
+```
+
 ### 필수 환경변수
 
 ```bash
