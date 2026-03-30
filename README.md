@@ -60,9 +60,20 @@ gcloud auth application-default login
 
 ---
 
-## 설치 (심볼릭 링크 배포)
+## 설치
 
-스킬 파일은 프로젝트 내 `skills/` 디렉토리에서 관리하고, Gemini CLI가 읽을 수 있도록 `~/.gemini/skills/`에 심볼릭 링크를 생성합니다.
+Gemini CLI Skills는 **전역 설치**와 **프로젝트 단위 설치** 두 가지 방식을 지원합니다.
+
+| 방식 | 경로 | 적용 범위 |
+|------|------|----------|
+| 전역 설치 | `~/.gemini/skills/` | 모든 프로젝트에서 사용 가능 |
+| 프로젝트 단위 설치 | `<프로젝트 루트>/.gemini/skills/` | 해당 프로젝트에서만 사용 가능 |
+
+> **우선순위:** 같은 이름의 스킬이 양쪽에 모두 있으면 프로젝트 단위 스킬이 우선 적용됩니다.
+
+---
+
+### 방법 1. 전역 설치 (모든 프로젝트에서 사용)
 
 ```bash
 # 프로젝트 클론
@@ -105,6 +116,43 @@ thinking-skills     -> /home/user/sandbox/vertexai-skills/skills/thinking-skills
 translate-skills    -> /home/user/sandbox/vertexai-skills/skills/translate-skills
 url-context-skills  -> /home/user/sandbox/vertexai-skills/skills/url-context-skills
 video-skills        -> /home/user/sandbox/vertexai-skills/skills/video-skills
+```
+
+---
+
+### 방법 2. 프로젝트 단위 설치 (특정 프로젝트에서만 사용)
+
+Vertex AI 관련 작업을 하는 특정 프로젝트에만 스킬을 적용하고 싶을 때 사용합니다.
+
+```bash
+# 내 프로젝트 루트로 이동
+cd ~/my-project
+
+# 프로젝트 단위 skills 디렉토리 생성
+mkdir -p .gemini/skills
+
+# 필요한 스킬만 선택해서 심볼릭 링크 생성
+SKILLS_REPO=~/sandbox/vertexai-skills
+
+ln -s "$SKILLS_REPO/skills/text-skills"      .gemini/skills/text-skills
+ln -s "$SKILLS_REPO/skills/model-skills"     .gemini/skills/model-skills
+ln -s "$SKILLS_REPO/skills/grounding-skills" .gemini/skills/grounding-skills
+# 필요한 스킬만 추가하면 됩니다
+```
+
+> **권장:** `.gemini/` 디렉토리를 `.gitignore`에 추가하거나, 팀 전체가 공유할 경우 그대로 커밋합니다.
+
+### 설치 확인
+
+```bash
+ls -la .gemini/skills/
+```
+
+정상 출력 예시:
+```
+grounding-skills -> /home/user/sandbox/vertexai-skills/skills/grounding-skills
+model-skills     -> /home/user/sandbox/vertexai-skills/skills/model-skills
+text-skills      -> /home/user/sandbox/vertexai-skills/skills/text-skills
 ```
 
 ---
