@@ -246,3 +246,77 @@ for part in response2.candidates[0].content.parts:
 3. 세부 요소 추가: `"Add gas lamps and wet cobblestones"`
 
 > **원칙:** 프롬프트가 모호하면 이미지 없이 텍스트만 반환될 수 있다. 이미지 생성을 명시적으로 요청한다.
+
+---
+
+## § 5. Limitations
+
+### 언어 지원
+
+| 모델 | 지원 언어 |
+|------|---------|
+| `gemini-2.5-flash-image` | EN, es-MX, ja-JP, zh-CN, hi-IN |
+| `gemini-3-pro-image-preview` | AR, DE, EN, ES, FR, HI, ID, IT, JA, KO, PT, RU, UK, VI, ZH |
+
+### 입력 제한
+
+- 오디오/비디오 입력 불가 (이미지 + 텍스트만 지원)
+- 요청당 최대 이미지 수: Gemini 2.5 Flash → 3개 / Gemini 3 Pro → 14개
+- 전체 요청 크기: 50MB 이하
+
+### 출력 한계
+
+- 요청한 이미지 수보다 적게 생성될 수 있음 (안전 필터로 인해)
+- 이미지 내 텍스트 생성 시: 텍스트 먼저 생성 → 이미지 생성 2단계 접근 필요
+- 프롬프트가 모호하면 이미지 없이 텍스트만 반환될 수 있음 → 명시적으로 이미지 요청
+
+---
+
+## § 6. Responsible AI & Safety
+
+### 금지 콘텐츠
+
+다음 카테고리는 Generative AI Prohibited Use Policy에 의해 금지됨:
+- 아동 착취 콘텐츠
+- 폭력적 극단주의 / 테러리즘
+- 비동의 친밀 이미지
+- 자해 조장
+- 성적으로 노골적인 콘텐츠
+- 혐오 발언
+- 괴롭힘 / 사이버불링
+
+### Safety 필터 에러 처리
+
+```python
+from google import genai
+from google.genai.types import GenerateContentConfig, Modality
+from PIL import Image
+from io import BytesIO
+
+client = genai.Client()
+
+response = client.models.generate_content(
+    model="gemini-3-pro-image-preview",
+    contents="Generate an image...",
+    config=GenerateContentConfig(
+        response_modalities=[Modality.TEXT, Modality.IMAGE],
+    ),
+)
+
+# 안전 필터 차단 여부 확인
+candidate = response.candidates[0]
+if candidate.finish_reason.name == "SAFETY":
+    print("Safety filter blocked this request")
+    for rating in candidate.safety_ratings:
+        if rating.blocked:
+            print(f"Blocked by: {rating.category}")
+else:
+    # 정상 처리
+    for part in candidate.content.parts:
+        if part.inline_data:
+            Image.open(BytesIO(part.inline_data.data)).save("output.png")
+```
+
+> **원칙:**
+> - `finish_reason`이 `SAFETY`이면 프롬프트를 수정해야 한다.
+> - 안전 필터 민감도는 애플리케이션 요구사항에 따라 조정 가능하다.
