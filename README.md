@@ -1,8 +1,8 @@
 # vertexaistudio-skills
 
-**Vertex AI Studio** 기반 생성형 AI 개발을 위한 **Gemini CLI Skills** 모음. Vertex AI Studio에서 제공하는 모델(Gemini, Imagen, Veo)을 `google-genai` Python SDK로 호출할 때 필요한 올바른 코드 패턴과 레퍼런스를 제공한다.
+**Vertex AI Studio** 기반 생성형 AI 개발을 위한 **Gemini CLI Skills** 모음입니다. Vertex AI Studio에서 제공하는 모델(Gemini, Imagen, Veo)을 `google-genai` Python SDK로 호출할 때 필요한 올바른 코드 패턴과 레퍼런스를 제공합니다.
 
-> **범위:** 이 스킬은 Vertex AI Studio의 생성형 AI API(`generate_content`, `generate_images`, `generate_videos`)에 집중한다. Vertex AI Pipelines, AutoML, Custom Training 등 MLOps 영역은 다루지 않는다.
+> **범위:** 이 스킬은 Vertex AI Studio의 생성형 AI API(`generate_content`, `generate_images`, `generate_videos`)에 집중합니다. Vertex AI Pipelines, AutoML, Custom Training 등 MLOps 영역은 다루지 않습니다.
 
 ---
 
@@ -45,7 +45,7 @@ export GOOGLE_GENAI_USE_VERTEXAI="True"
 
 ### GCS 버킷 (video-skills 전용)
 
-비디오 생성 결과는 반드시 Cloud Storage에 저장된다. 미리 버킷을 생성해야 한다:
+비디오 생성 결과는 반드시 Cloud Storage에 저장됩니다. 미리 버킷을 생성해 주세요.
 
 ```bash
 gcloud storage buckets create gs://your-bucket --location=us-central1
@@ -62,7 +62,7 @@ gcloud auth application-default login
 
 ## 설치 (심볼릭 링크 배포)
 
-스킬 파일은 프로젝트 내 `skills/` 디렉토리에서 관리하고, Gemini CLI가 읽을 수 있도록 `~/.gemini/skills/`에 심볼릭 링크를 생성한다.
+스킬 파일은 프로젝트 내 `skills/` 디렉토리에서 관리하고, Gemini CLI가 읽을 수 있도록 `~/.gemini/skills/`에 심볼릭 링크를 생성합니다.
 
 ```bash
 # 프로젝트 클론
@@ -113,16 +113,16 @@ video-skills        -> /home/user/sandbox/vertexai-skills/skills/video-skills
 
 ### 작동 원리
 
-스킬은 별도 명령어 없이 **자동으로 활성화**된다. 두 가지 방식으로 트리거된다.
+스킬은 별도 명령어 없이 **자동으로 활성화**됩니다. 두 가지 방식으로 트리거됩니다.
 
-**① 키워드 매칭** — 메시지에 트리거 키워드가 포함되면 해당 스킬이 자동 로드된다.
+**① 키워드 매칭** — 메시지에 트리거 키워드가 포함되면 해당 스킬이 자동 로드됩니다.
 
 ```
-"Veo로 비디오 생성하는 코드 써줘"  →  video-skills 활성화
-"429 에러가 계속 나는데 어떻게 해?"  →  model-skills 활성화
+"Veo로 비디오 생성하는 코드 작성해 주세요"  →  video-skills 활성화
+"429 에러가 계속 나는데 어떻게 해결하나요?"  →  model-skills 활성화
 ```
 
-**② 코드 컨텍스트** — 편집 중인 코드에 특정 import가 있으면 자동 활성화된다.
+**② 코드 컨텍스트** — 편집 중인 코드에 특정 import가 있으면 자동 활성화됩니다.
 
 | 코드 내 import | 활성화 스킬 |
 |---------------|-----------|
@@ -130,7 +130,7 @@ video-skills        -> /home/user/sandbox/vertexai-skills/skills/video-skills
 | `ThinkingConfig` | `thinking-skills` |
 | `GoogleSearch` | `grounding-skills` |
 
-스킬이 로드되면 Gemini는 SKILL.md의 코드 패턴과 Best Practice를 참고해서 답변한다. 스킬 없이 질문하면 잘못된 API 패턴이 제안될 수 있다.
+스킬이 로드되면 Gemini는 SKILL.md의 코드 패턴과 Best Practice를 참고해 답변합니다. 스킬 없이 질문하면 잘못된 API 패턴이 제안될 수 있습니다.
 
 ---
 
@@ -138,111 +138,111 @@ video-skills        -> /home/user/sandbox/vertexai-skills/skills/video-skills
 
 | 트리거 | 예시 요청 |
 |--------|---------|
-| 코드에 `from google import genai` 포함 | "이 코드에 스트리밍을 추가해줘" |
-| `text generation`, `텍스트 생성` | "텍스트 생성 코드 작성해줘" |
-| `function calling`, `함수 호출` | "날씨 API를 함수 호출로 연결하는 코드 써줘" |
-| `structured output`, `구조화된 출력` | "JSON 형식으로 응답받는 코드 써줘" |
-| `code execution`, `코드 실행` | "모델이 직접 계산하는 코드 실행 예제 써줘" |
-| `system instruction`, `시스템 지시` | "시스템 지시로 역할을 설정하는 방법 알려줘" |
+| 코드에 `from google import genai` 포함 | "이 코드에 스트리밍을 추가해 주세요" |
+| `text generation`, `텍스트 생성` | "텍스트 생성 코드를 작성해 주세요" |
+| `function calling`, `함수 호출` | "날씨 API를 함수 호출로 연결하는 코드를 작성해 주세요" |
+| `structured output`, `구조화된 출력` | "JSON 형식으로 응답받는 코드를 작성해 주세요" |
+| `code execution`, `코드 실행` | "모델이 직접 계산하는 코드 실행 예제를 작성해 주세요" |
+| `system instruction`, `시스템 지시` | "시스템 지시로 역할을 설정하는 방법을 알려 주세요" |
 
 ### image-skills 트리거
 
 | 트리거 | 예시 요청 |
 |--------|---------|
-| `Imagen`, `아이마젠` | "Imagen 4로 이미지 생성하는 코드 써줘" |
-| `image generation`, `이미지 생성` | "이미지 생성하는 코드 만들어줘" |
-| `edit image`, `이미지 편집` | "기존 이미지를 수채화 스타일로 편집해줘" |
-| `Gemini image`, `제미나이 이미지` | "Gemini 이미지 모델로 생성하는 방법 알려줘" |
+| `Imagen`, `아이마젠` | "Imagen 4로 이미지 생성하는 코드를 작성해 주세요" |
+| `image generation`, `이미지 생성` | "이미지 생성하는 코드를 만들어 주세요" |
+| `edit image`, `이미지 편집` | "기존 이미지를 수채화 스타일로 편집해 주세요" |
+| `Gemini image`, `제미나이 이미지` | "Gemini 이미지 모델로 생성하는 방법을 알려 주세요" |
 
 ### video-skills 트리거
 
 | 트리거 | 예시 요청 |
 |--------|---------|
-| `Veo`, `비오` | "Veo로 비디오 생성하는 코드 써줘" |
-| `video generation`, `비디오 생성` | "텍스트로 영상 만드는 코드 써줘" |
-| `text to video`, `텍스트로 영상` | "프롬프트로 비디오 생성해줘" |
-| `image to video`, `이미지로 영상` | "이미지를 비디오로 변환하는 코드 써줘" |
-| `extend video`, `영상 연장` | "비디오 연장하는 방법 알려줘" |
+| `Veo`, `비오` | "Veo로 비디오 생성하는 코드를 작성해 주세요" |
+| `video generation`, `비디오 생성` | "텍스트로 영상 만드는 코드를 작성해 주세요" |
+| `text to video`, `텍스트로 영상` | "프롬프트로 비디오를 생성해 주세요" |
+| `image to video`, `이미지로 영상` | "이미지를 비디오로 변환하는 코드를 작성해 주세요" |
+| `extend video`, `영상 연장` | "비디오 연장하는 방법을 알려 주세요" |
 
 ### thinking-skills 트리거
 
 | 트리거 | 예시 요청 |
 |--------|---------|
-| `ThinkingConfig` 임포트 | "이 코드에 사고 예산을 설정해줘" |
-| `thinking budget`, `생각 예산` | "thinking_budget으로 추론 깊이 제어하는 법 알려줘" |
-| `thinking level`, `사고 모드` | "Gemini 3에서 ThinkingLevel.HIGH 사용하는 코드 써줘" |
-| `thought signatures`, `사고 시그니처` | "함수 호출 시 Thought Signatures 처리하는 방법" |
-| `reasoning model`, `추론 모델` | "추론 모델로 수학 문제 풀게 해줘" |
+| `ThinkingConfig` 임포트 | "이 코드에 사고 예산을 설정해 주세요" |
+| `thinking budget`, `생각 예산` | "thinking_budget으로 추론 깊이를 제어하는 방법을 알려 주세요" |
+| `thinking level`, `사고 모드` | "Gemini 3에서 ThinkingLevel.HIGH 사용하는 코드를 작성해 주세요" |
+| `thought signatures`, `사고 시그니처` | "함수 호출 시 Thought Signatures 처리하는 방법을 알려 주세요" |
+| `reasoning model`, `추론 모델` | "추론 모델로 수학 문제를 풀게 해 주세요" |
 
 ### grounding-skills 트리거
 
 | 트리거 | 예시 요청 |
 |--------|---------|
-| `GoogleSearch` 임포트 | "이 코드에 Google Search 그라운딩 추가해줘" |
-| `grounding`, `그라운딩` | "그라운딩으로 환각을 줄이는 방법 알려줘" |
-| `Vertex AI Search`, `버텍스 검색` | "내 문서로 RAG 구성하는 코드 써줘" |
-| `Elasticsearch grounding` | "ES 인덱스를 그라운딩 소스로 쓰는 코드 써줘" |
-| `enterprise web search` | "컴플라이언스 환경에서 웹 그라운딩 사용하는 방법" |
+| `GoogleSearch` 임포트 | "이 코드에 Google Search 그라운딩을 추가해 주세요" |
+| `grounding`, `그라운딩` | "그라운딩으로 환각을 줄이는 방법을 알려 주세요" |
+| `Vertex AI Search`, `버텍스 검색` | "내 문서로 RAG를 구성하는 코드를 작성해 주세요" |
+| `Elasticsearch grounding` | "ES 인덱스를 그라운딩 소스로 사용하는 코드를 작성해 주세요" |
+| `enterprise web search` | "컴플라이언스 환경에서 웹 그라운딩 사용하는 방법을 알려 주세요" |
 
 ### model-skills 트리거
 
 | 트리거 | 예시 요청 |
 |--------|---------|
 | `model selection`, `모델 선택`, `어떤 모델`, `모델 추천` | "어떤 Gemini 모델을 써야 하나요?" |
-| `model lifecycle`, `모델 라이프사이클` | "모델 은퇴일 확인하고 싶어요" |
-| `deprecated model`, `retired model`, `모델 은퇴` | "1.5 모델 아직 써도 되나요?" |
-| `model migration`, `모델 마이그레이션`, `1.5 to 2.5` | "1.5에서 2.5로 마이그레이션하는 방법" |
-| `SDK migration`, `SDK 마이그레이션` | "Vertex AI SDK에서 Gen AI SDK로 전환하는 코드 써줘" |
-| `standard paygo`, `usage tier`, `TPM`, `할당량`, `429 에러` | "Standard PayGo 티어 구조 알려줘" |
-| `provisioned throughput`, `프로비전드 처리량` | "Provisioned Throughput이 필요한지 판단하는 기준이 뭔가요?" |
+| `model lifecycle`, `모델 라이프사이클` | "모델 은퇴일을 확인하고 싶습니다" |
+| `deprecated model`, `retired model`, `모델 은퇴` | "1.5 모델을 아직 써도 되나요?" |
+| `model migration`, `모델 마이그레이션`, `1.5 to 2.5` | "1.5에서 2.5로 마이그레이션하는 방법을 알려 주세요" |
+| `SDK migration`, `SDK 마이그레이션` | "Vertex AI SDK에서 Gen AI SDK로 전환하는 코드를 작성해 주세요" |
+| `standard paygo`, `usage tier`, `TPM`, `할당량`, `429 에러` | "Standard PayGo 티어 구조를 알려 주세요" |
+| `provisioned throughput`, `프로비전드 처리량` | "Provisioned Throughput이 필요한지 판단하는 기준이 무엇인가요?" |
 
 ### embedding-skills 트리거
 
 | 트리거 | 예시 요청 |
 |--------|---------|
-| `embed_content` 임포트 | "이 임베딩 코드에 task_type을 추가해줘" |
-| `embedding`, `임베딩`, `텍스트 임베딩` | "텍스트 임베딩 코드 써줘" |
-| `vector embedding`, `벡터 임베딩` | "문서를 벡터로 변환하는 코드 만들어줘" |
-| `semantic similarity`, `의미적 유사도` | "두 문장의 유사도를 계산하는 코드 써줘" |
-| `multimodal embedding`, `멀티모달 임베딩` | "이미지와 텍스트를 같이 임베딩하는 방법" |
-| `batch embedding`, `배치 임베딩` | "30,000개 문서를 배치로 임베딩하는 방법" |
-| `task type`, `임베드` | "RETRIEVAL_QUERY와 RETRIEVAL_DOCUMENT 차이가 뭔가요?" |
+| `embed_content` 임포트 | "이 임베딩 코드에 task_type을 추가해 주세요" |
+| `embedding`, `임베딩`, `텍스트 임베딩` | "텍스트 임베딩 코드를 작성해 주세요" |
+| `vector embedding`, `벡터 임베딩` | "문서를 벡터로 변환하는 코드를 만들어 주세요" |
+| `semantic similarity`, `의미적 유사도` | "두 문장의 유사도를 계산하는 코드를 작성해 주세요" |
+| `multimodal embedding`, `멀티모달 임베딩` | "이미지와 텍스트를 함께 임베딩하는 방법을 알려 주세요" |
+| `batch embedding`, `배치 임베딩` | "30,000개 문서를 배치로 임베딩하는 방법을 알려 주세요" |
+| `task type`, `임베드` | "RETRIEVAL_QUERY와 RETRIEVAL_DOCUMENT의 차이가 무엇인가요?" |
 
 ### translate-skills 트리거
 
 | 트리거 | 예시 요청 |
 |--------|---------|
-| `translate`, `번역`, `텍스트 번역` | "텍스트 번역하는 코드 써줘" |
-| `Translation LLM`, `cloud translate` | "Translation LLM API 사용하는 방법" |
-| `NMT`, `언어 번역` | "NMT로 100개 언어 번역하는 코드 써줘" |
-| `다국어 번역`, `자동 번역` | "한국어→영어 번역 코드 만들어줘" |
+| `translate`, `번역`, `텍스트 번역` | "텍스트 번역하는 코드를 작성해 주세요" |
+| `Translation LLM`, `cloud translate` | "Translation LLM API 사용하는 방법을 알려 주세요" |
+| `NMT`, `언어 번역` | "NMT로 100개 언어 번역하는 코드를 작성해 주세요" |
+| `다국어 번역`, `자동 번역` | "한국어→영어 번역 코드를 만들어 주세요" |
 
 ### speech-skills 트리거
 
 | 트리거 | 예시 요청 |
 |--------|---------|
-| `text to speech`, `TTS`, `텍스트 음성 변환` | "TTS 코드 써줘" |
-| `speech to text`, `STT`, `음성 인식` | "Chirp 모델로 음성 인식하는 코드 써줘" |
-| `voice synthesis`, `음성 합성` | "음성 합성 API 사용 방법" |
-| `Chirp`, `오디오 변환`, `음성 전사` | "WAV 파일을 텍스트로 변환하는 코드" |
+| `text to speech`, `TTS`, `텍스트 음성 변환` | "TTS 코드를 작성해 주세요" |
+| `speech to text`, `STT`, `음성 인식` | "Chirp 모델로 음성 인식하는 코드를 작성해 주세요" |
+| `voice synthesis`, `음성 합성` | "음성 합성 API 사용 방법을 알려 주세요" |
+| `Chirp`, `오디오 변환`, `음성 전사` | "WAV 파일을 텍스트로 변환하는 코드를 작성해 주세요" |
 
 ### computer-use-skills 트리거
 
 | 트리거 | 예시 요청 |
 |--------|---------|
-| `ComputerUse` 임포트 | "이 코드에 컴퓨터 사용 도구를 추가해줘" |
-| `computer use`, `컴퓨터 사용` | "Gemini로 브라우저를 자동화하는 코드 써줘" |
-| `browser automation`, `브라우저 자동화` | "웹 페이지 자동 클릭하는 코드 만들어줘" |
-| `GUI automation`, `web automation` | "화면을 보고 자동으로 폼을 채우는 방법" |
+| `ComputerUse` 임포트 | "이 코드에 컴퓨터 사용 도구를 추가해 주세요" |
+| `computer use`, `컴퓨터 사용` | "Gemini로 브라우저를 자동화하는 코드를 작성해 주세요" |
+| `browser automation`, `브라우저 자동화` | "웹 페이지 자동 클릭하는 코드를 만들어 주세요" |
+| `GUI automation`, `web automation` | "화면을 보고 자동으로 폼을 채우는 방법을 알려 주세요" |
 
 ### url-context-skills 트리거
 
 | 트리거 | 예시 요청 |
 |--------|---------|
-| `UrlContext` 임포트 | "이 코드에 URL 컨텍스트를 추가해줘" |
-| `url context`, `URL 컨텍스트` | "URL 내용을 참조해서 답변하는 코드 써줘" |
-| `URL grounding`, `URL 그라운딩` | "특정 URL을 기반으로 요약하는 코드 만들어줘" |
-| `웹 페이지 읽기`, `링크 내용 참조` | "이 URL의 내용을 읽어서 분석해줘" |
+| `UrlContext` 임포트 | "이 코드에 URL 컨텍스트를 추가해 주세요" |
+| `url context`, `URL 컨텍스트` | "URL 내용을 참조해서 답변하는 코드를 작성해 주세요" |
+| `URL grounding`, `URL 그라운딩` | "특정 URL을 기반으로 요약하는 코드를 만들어 주세요" |
+| `웹 페이지 읽기`, `링크 내용 참조` | "이 URL의 내용을 읽어서 분석해 주세요" |
 
 ---
 
@@ -385,7 +385,7 @@ video-skills        -> /home/user/sandbox/vertexai-skills/skills/video-skills
 
 ## 모델 선택 가이드
 
-> 상세 내용은 `model-skills`를 참고한다. 아래는 빠른 참조용 요약이다.
+> 상세 내용은 `model-skills`를 참고하세요. 아래는 빠른 참조용 요약입니다.
 >
 > 참고: [Model versions and lifecycle](https://cloud.google.com/vertex-ai/generative-ai/docs/learn/model-versions) · [Migration guide](https://cloud.google.com/vertex-ai/generative-ai/docs/migrate) · [Standard PayGo](https://cloud.google.com/vertex-ai/generative-ai/docs/standard-paygo)
 
@@ -444,7 +444,7 @@ video-skills        -> /home/user/sandbox/vertexai-skills/skills/video-skills
 
 ## 공통 클라이언트 초기화 패턴
 
-모든 스킬이 동일한 초기화 패턴을 사용한다:
+모든 스킬이 동일한 초기화 패턴을 사용합니다.
 
 ```python
 from google import genai
@@ -453,7 +453,7 @@ from google.genai.types import HttpOptions
 client = genai.Client(http_options=HttpOptions(api_version="v1"))
 ```
 
-> `client`는 모듈 최상단에서 한 번만 초기화한다. 함수마다 재생성하지 않는다.
+> `client`는 모듈 최상단에서 한 번만 초기화하세요. 함수마다 재생성하지 않아야 합니다.
 
 대안 (환경변수 대신 직접 지정):
 
@@ -515,13 +515,13 @@ vertexai-skills/
 
 ## 스킬 업데이트
 
-스킬 파일은 git으로 관리된다. 심볼릭 링크는 항상 최신 파일을 가리키므로 **별도 재배포 없이** 수정 즉시 반영된다.
+스킬 파일은 git으로 관리됩니다. 심볼릭 링크는 항상 최신 파일을 가리키므로 **별도 재배포 없이** 수정 즉시 반영됩니다.
 
 ```bash
 # 스킬 수정 후
 git add skills/<skill-name>/SKILL.md
 git commit -m "feat: update <section> in <skill-name>"
-# 완료 — Gemini CLI는 다음 실행 시 자동으로 업데이트된 내용을 로드
+# 완료 — Gemini CLI는 다음 실행 시 자동으로 업데이트된 내용을 로드합니다
 ```
 
 ---
