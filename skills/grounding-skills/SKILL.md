@@ -1,20 +1,20 @@
 ---
 name: grounding-skills
-description: Use when working with grounding on Vertex AI using google-genai Python SDK — imports GoogleSearch, GoogleMaps, VertexAISearch, Elasticsearch, ExternalApi, EnterpriseWebSearch, or requests involving "grounding", "Google Search grounding", "RAG", "Vertex AI Search", "Elasticsearch grounding", "enterprise web search". 한국어: "그라운딩", "검색 기반 생성", "구글 검색 연동", "버텍스 검색", "환각 방지", "외부 데이터 연결".
+description: Use when working with grounding on Vertex AI using google-genai Python SDK — imports GoogleSearch, GoogleMaps, VertexAISearch, Elasticsearch, ExternalApi, EnterpriseWebSearch, or requests involving "grounding", "Google Search grounding", "RAG", "Vertex AI Search", "Elasticsearch grounding", "enterprise web search". Korean: "그라운딩", "검색 기반 생성", "구글 검색 연동", "버텍스 검색", "환각 방지", "외부 데이터 연결".
 version: 1.0.0
 ---
 
-# Grounding Skills — google-genai Python SDK 레퍼런스
+# Grounding Skills — google-genai Python SDK Reference
 
-## 환경 설정
+## Environment Setup
 
-### 라이브러리 설치
+### Install Libraries
 
 ```bash
 pip install --upgrade google-genai
 ```
 
-### 필수 환경변수
+### Required Environment Variables
 
 ```bash
 export GOOGLE_CLOUD_PROJECT="your-project-id"
@@ -22,7 +22,7 @@ export GOOGLE_CLOUD_LOCATION="us-central1"
 export GOOGLE_GENAI_USE_VERTEXAI="True"
 ```
 
-### 클라이언트 초기화
+### Client Initialization
 
 ```python
 from google import genai
@@ -31,25 +31,25 @@ from google.genai.types import HttpOptions
 client = genai.Client(http_options=HttpOptions(api_version="v1"))
 ```
 
-### 그라운딩 방식 선택 가이드
+### Grounding Method Selection Guide
 
-| 방식 | Tool 클래스 | 용도 |
-|------|------------|------|
-| Google Search | `GoogleSearch` | 최신 공개 웹 데이터 |
-| Google Maps | `GoogleMaps` | 장소/지리 정보 |
-| Vertex AI Search | `VertexAISearch` (via `Retrieval`) | 내 문서/웹사이트 데이터 |
-| Elasticsearch | `ExternalApi` (via `Retrieval`) | 기존 ES 인덱스 |
-| Custom Search API | `ExternalApi` (via `Retrieval`) | 자체 검색 API |
-| Parallel Web Search | REST only (`parallelAiSearch`) | LLM 최적화 웹 인덱스 |
-| Enterprise Web Search | `EnterpriseWebSearch` | 컴플라이언스 규제 환경 |
+| Method | Tool Class | Use Case |
+|--------|-----------|----------|
+| Google Search | `GoogleSearch` | Latest public web data |
+| Google Maps | `GoogleMaps` | Location and geographic information |
+| Vertex AI Search | `VertexAISearch` (via `Retrieval`) | Your own documents or website data |
+| Elasticsearch | `ExternalApi` (via `Retrieval`) | Existing ES index |
+| Custom Search API | `ExternalApi` (via `Retrieval`) | Your own search API |
+| Parallel Web Search | REST only (`parallelAiSearch`) | LLM-optimized web index |
+| Enterprise Web Search | `EnterpriseWebSearch` | Compliance-regulated environments |
 
-> **참고:** Vertex AI RAG Engine 그라운딩(`ground-responses-using-rag`)은 `vertexai` SDK(`google-cloud-aiplatform`)를 사용하며, 이 스킬의 `google-genai` SDK 범위에 포함되지 않는다.
+> **Note:** Vertex AI RAG Engine grounding (`ground-responses-using-rag`) uses the `vertexai` SDK (`google-cloud-aiplatform`) and is outside the `google-genai` SDK scope of this skill.
 
 ---
 
-## § 1. Google Search 그라운딩
+## § 1. Google Search Grounding
 
-### 언제: 최신 공개 웹 정보로 응답을 보강할 때
+### When: augmenting responses with the latest public web information
 
 ```python
 from google import genai
@@ -69,7 +69,7 @@ response = client.models.generate_content(
         tools=[
             Tool(
                 google_search=GoogleSearch(
-                    exclude_domains=["domain.com"],   # 제외할 도메인 (선택)
+                    exclude_domains=["domain.com"],   # domains to exclude (optional)
                 )
             )
         ],
@@ -77,12 +77,12 @@ response = client.models.generate_content(
 )
 
 print(response.text)
-# 검색 출처 확인
+# Check search sources
 for chunk in response.candidates[0].grounding_metadata.grounding_chunks:
     print(chunk.web.uri)
 ```
 
-### Dynamic Retrieval (조건부 그라운딩)
+### Dynamic Retrieval (Conditional Grounding)
 
 ```python
 from google import genai
@@ -98,7 +98,7 @@ response = client.models.generate_content(
             Tool(
                 google_search=GoogleSearch(
                     dynamic_retrieval_config=DynamicRetrievalConfig(
-                        dynamic_threshold=0.6,   # 0.0~1.0: 낮을수록 더 자주 검색
+                        dynamic_threshold=0.6,   # 0.0~1.0: lower = search more often
                     )
                 )
             )
@@ -107,24 +107,24 @@ response = client.models.generate_content(
 )
 ```
 
-### GoogleSearch 파라미터
+### GoogleSearch Parameters
 
-| 파라미터 | 타입 | 설명 |
-|---------|------|------|
-| `exclude_domains` | `list[str]` | 그라운딩에서 제외할 도메인 목록 |
-| `dynamic_retrieval_config` | `DynamicRetrievalConfig` | 조건부 그라운딩 설정 |
-| `dynamic_threshold` | `float` (0.0~1.0) | 검색 발동 임계값 |
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `exclude_domains` | `list[str]` | List of domains to exclude from grounding |
+| `dynamic_retrieval_config` | `DynamicRetrievalConfig` | Conditional grounding configuration |
+| `dynamic_threshold` | `float` (0.0~1.0) | Threshold for triggering search |
 
-> **원칙:**
-> - 권장 temperature: `1.0`.
-> - 일일 최대 1,000,000 쿼리 제한.
-> - Search Suggestion HTML/CSS(`searchEntryPoint`)는 수정 없이 그대로 표시해야 한다.
+> **Rule:**
+> - Recommended temperature: `1.0`.
+> - Maximum 1,000,000 queries per day.
+> - Search Suggestion HTML/CSS (`searchEntryPoint`) must be displayed as-is without modification.
 
 ---
 
-## § 2. Google Maps 그라운딩
+## § 2. Google Maps Grounding
 
-### 언제: 장소, 지역 정보, 주변 검색이 필요할 때
+### When: location queries, local search, or nearby place information
 
 ```python
 from google import genai
@@ -146,14 +146,14 @@ response = client.models.generate_content(
     config=GenerateContentConfig(
         tools=[
             Tool(google_maps=GoogleMaps(
-                enable_widget=False,   # True: 지도 위젯 토큰 반환
+                enable_widget=False,   # True: include map widget token in response
             ))
         ],
         tool_config=ToolConfig(
             retrieval_config=RetrievalConfig(
                 lat_lng=LatLng(
-                    latitude=37.5665,    # 서울 위도
-                    longitude=126.9780,  # 서울 경도
+                    latitude=37.5665,    # latitude
+                    longitude=126.9780,  # longitude
                 ),
                 language_code="ko_KR",
             ),
@@ -164,25 +164,25 @@ response = client.models.generate_content(
 print(response.text)
 ```
 
-### GoogleMaps 파라미터
+### GoogleMaps Parameters
 
-| 파라미터 | 타입 | 설명 |
-|---------|------|------|
-| `enable_widget` | `bool` | `True`이면 응답에 지도 위젯 토큰 포함 |
-| `lat_lng.latitude` | `float` | 검색 기준 위도 |
-| `lat_lng.longitude` | `float` | 검색 기준 경도 |
-| `language_code` | `str` | 응답 언어 코드 (예: `"ko_KR"`, `"en_US"`) |
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `enable_widget` | `bool` | If `True`, include map widget token in response |
+| `lat_lng.latitude` | `float` | Reference latitude for search |
+| `lat_lng.longitude` | `float` | Reference longitude for search |
+| `language_code` | `str` | Response language code (e.g. `"ko_KR"`, `"en_US"`) |
 
-> **원칙:**
-> - Maps 출처는 생성된 콘텐츠 바로 다음에 반드시 표시해야 한다.
-> - Gemini 3 Pro / Gemini 3 Pro Image는 일일 5,000 쿼리 제한.
-> - 금지 지역: 중국, 쿠바, 이란, 북한, 시리아 등.
+> **Rule:**
+> - Maps attribution must be displayed immediately after the generated content.
+> - Gemini 3 Pro / Gemini 3 Pro Image: 5,000 queries per day limit.
+> - Prohibited regions: China, Cuba, Iran, North Korea, Syria, etc.
 
 ---
 
-## § 3. Vertex AI Search 그라운딩
+## § 3. Vertex AI Search Grounding
 
-### 언제: 내 문서나 웹사이트 데이터 스토어로 RAG를 구성할 때
+### When: building RAG from your own documents or website data store
 
 ```python
 from google import genai
@@ -196,7 +196,7 @@ from google.genai.types import (
 
 client = genai.Client(http_options=HttpOptions(api_version="v1"))
 
-# 데이터 스토어 경로 형식:
+# Data store path format:
 # projects/{PROJECT_ID}/locations/global/collections/default_collection/dataStores/{DATASTORE_ID}
 DATASTORE_PATH = "projects/my-project/locations/global/collections/default_collection/dataStores/my-store"
 
@@ -217,39 +217,39 @@ response = client.models.generate_content(
 )
 
 print(response.text)
-# 출처 확인
+# Check sources
 for chunk in response.candidates[0].grounding_metadata.grounding_chunks:
     print(chunk.retrieved_context.uri)
 ```
 
-### 사전 요구사항
+### Prerequisites
 
 ```bash
-# 1. AI Applications API 활성화
+# 1. Enable AI Applications API
 gcloud services enable discoveryengine.googleapis.com
 
-# 2. IAM 권한 부여
+# 2. Grant IAM permissions
 gcloud projects add-iam-policy-binding PROJECT_ID \
   --member="user:USER_EMAIL" \
   --role="roles/discoveryengine.viewer"
 ```
 
-### 파라미터
+### Parameters
 
-| 파라미터 | 타입 | 설명 |
-|---------|------|------|
-| `VertexAISearch.datastore` | `str` | 데이터 스토어 전체 리소스 경로 |
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `VertexAISearch.datastore` | `str` | Full resource path of the data store |
 
-> **원칙:**
-> - 최대 10개 데이터 소스를 동시에 사용할 수 있다.
-> - Google Search 그라운딩과 병행 사용 가능.
-> - Gemini 2.5 이상에서는 `confidence_scores`가 제공되지 않는다.
+> **Rule:**
+> - Up to 10 data sources can be used simultaneously.
+> - Can be used alongside Google Search grounding.
+> - `confidence_scores` are not provided for Gemini 2.5 and above.
 
 ---
 
-## § 4. Elasticsearch 그라운딩
+## § 4. Elasticsearch Grounding
 
-### 언제: 기존 Elasticsearch 인덱스를 그라운딩 소스로 활용할 때
+### When: using an existing Elasticsearch index as a grounding source
 
 ```python
 from google import genai
@@ -280,7 +280,7 @@ response = client.models.generate_content(
                         endpoint=ES_ENDPOINT,
                         api_auth={
                             "apiKeyConfig": {
-                                "apiKeyString": f"ApiKey {ES_API_KEY}"   # "ApiKey " 접두사 필수
+                                "apiKeyString": f"ApiKey {ES_API_KEY}"   # "ApiKey " prefix required
                             }
                         },
                         elastic_search_params={
@@ -298,27 +298,27 @@ response = client.models.generate_content(
 print(response.text)
 ```
 
-### Elasticsearch 파라미터
+### Elasticsearch Parameters
 
-| 파라미터 | 위치 | 설명 |
-|---------|------|------|
-| `api_spec` | `ExternalApi` | 반드시 `"ELASTIC_SEARCH"` |
-| `endpoint` | `ExternalApi` | Elasticsearch 클러스터 URL |
-| `api_auth.apiKeyConfig.apiKeyString` | `ExternalApi` | 형식: `"ApiKey <your-key>"` — 접두사 `"ApiKey "` 필수 |
-| `elastic_search_params.index` | `ExternalApi` | 검색할 인덱스 이름 |
-| `elastic_search_params.searchTemplate` | `ExternalApi` | Elasticsearch 검색 템플릿 이름 |
-| `elastic_search_params.numHits` | `ExternalApi` | 반환할 결과 수 |
+| Parameter | Location | Description |
+|-----------|----------|-------------|
+| `api_spec` | `ExternalApi` | Must be `"ELASTIC_SEARCH"` |
+| `endpoint` | `ExternalApi` | Elasticsearch cluster URL |
+| `api_auth.apiKeyConfig.apiKeyString` | `ExternalApi` | Format: `"ApiKey <your-key>"` — `"ApiKey "` prefix required |
+| `elastic_search_params.index` | `ExternalApi` | Index name to search |
+| `elastic_search_params.searchTemplate` | `ExternalApi` | Elasticsearch search template name |
+| `elastic_search_params.numHits` | `ExternalApi` | Number of results to return |
 
-> **원칙:**
-> - `apiKeyString` 값은 반드시 `"ApiKey "` 접두사를 포함해야 한다.
-> - 텍스트 입력만 지원 (멀티모달 입력 불가).
-> - 최대 10개 데이터 소스를 동시에 사용할 수 있다.
+> **Rule:**
+> - `apiKeyString` value must include the `"ApiKey "` prefix.
+> - Text input only (multimodal input not supported).
+> - Up to 10 data sources can be used simultaneously.
 
 ---
 
-## § 5. Custom Search API 그라운딩
+## § 5. Custom Search API Grounding
 
-### 언제: 자체 검색 API를 그라운딩 소스로 연결할 때
+### When: connecting your own search API as a grounding source
 
 ```python
 from google import genai
@@ -343,7 +343,7 @@ response = client.models.generate_content(
             Tool(
                 retrieval=Retrieval(
                     external_api=ExternalApi(
-                        api_spec="SIMPLE_SEARCH",   # 현재 유일한 허용 값
+                        api_spec="SIMPLE_SEARCH",   # currently the only allowed value
                         endpoint=API_ENDPOINT,
                         api_auth={
                             "apiKeyConfig": {
@@ -360,42 +360,42 @@ response = client.models.generate_content(
 print(response.text)
 ```
 
-### 자체 API 계약 (필수 준수)
+### API Contract (must comply)
 
-Gemini가 POST로 호출하는 요청 형식:
+Request format Gemini sends via POST:
 ```json
-{ "query": "검색어 문자열" }
+{ "query": "search query string" }
 ```
 
-응답으로 반환해야 하는 형식:
+Required response format:
 ```json
 [
-  { "snippet": "관련 정보 텍스트", "uri": "출처 URL" },
-  { "snippet": "두 번째 정보", "uri": "출처2 URL" }
+  { "snippet": "relevant text", "uri": "source URL" },
+  { "snippet": "second result", "uri": "source2 URL" }
 ]
 ```
-결과가 없으면 빈 배열 `[]` 반환.
+Return empty array `[]` if no results.
 
-### ExternalApi 파라미터
+### ExternalApi Parameters
 
-| 파라미터 | 설명 |
-|---------|------|
-| `api_spec` | 반드시 `"SIMPLE_SEARCH"` |
-| `endpoint` | API Gateway 엔드포인트 URL |
-| `apiKeyConfig.apiKeyString` | Gemini가 `?key=` 쿼리 파라미터로 전달할 API 키 |
+| Parameter | Description |
+|-----------|-------------|
+| `api_spec` | Must be `"SIMPLE_SEARCH"` |
+| `endpoint` | API Gateway endpoint URL |
+| `apiKeyConfig.apiKeyString` | API key passed by Gemini as `?key=` query parameter |
 
-> **원칙:**
-> - API 응답 지연이 길어지면 전체 Gemini 응답 시간이 증가한다.
-> - `snippet`의 품질이 그라운딩 응답 품질을 직접 결정한다.
-> - 인증은 API 키 방식만 지원된다.
+> **Rule:**
+> - High API response latency increases overall Gemini response time.
+> - The quality of `snippet` directly determines grounding response quality.
+> - Only API key authentication is supported.
 
 ---
 
-## § 6. Parallel Web Search 그라운딩
+## § 6. Parallel Web Search Grounding
 
-### 언제: Parallel AI의 LLM 최적화 웹 인덱스를 활용할 때
+### When: using Parallel AI's LLM-optimized web index
 
-> **참고:** Parallel Web Search는 현재 REST API로만 사용할 수 있다.
+> **Note:** Parallel Web Search is currently only available via REST API.
 
 ```python
 import json
@@ -426,7 +426,7 @@ request_body = {
     }],
 }
 
-# REST API 호출 예시 (gcloud 인증 사용)
+# REST API call example (using gcloud authentication)
 # curl -X POST \
 #   -H "Authorization: Bearer $(gcloud auth print-access-token)" \
 #   -H "Content-Type: application/json" \
@@ -434,27 +434,27 @@ request_body = {
 #   "https://LOCATION-aiplatform.googleapis.com/v1/projects/PROJECT_ID/locations/LOCATION/publishers/google/models/MODEL_ID:generateContent"
 ```
 
-### Parallel Web Search 파라미터
+### Parallel Web Search Parameters
 
-| 파라미터 | 기본값 | 범위 | 설명 |
-|---------|--------|------|------|
-| `api_key` | — | — | Parallel AI API 키 (필수) |
-| `exclude_domains` | — | 최대 10개 | 제외할 도메인 |
-| `include_domains` | — | 최대 10개 | 포함할 도메인 (제한) |
-| `max_chars_per_result` | 30,000 | 1,000~100,000 | 결과당 최대 문자 수 |
-| `max_chars_total` | 100,000 | 1,000~1,000,000 | 전체 최대 문자 수 |
-| `max_results` | 10 | 1~20 | 최대 결과 수 |
+| Parameter | Default | Range | Description |
+|-----------|---------|-------|-------------|
+| `api_key` | — | — | Parallel AI API key (required) |
+| `exclude_domains` | — | up to 10 | Domains to exclude |
+| `include_domains` | — | up to 10 | Domains to include (restrict) |
+| `max_chars_per_result` | 30,000 | 1,000~100,000 | Max characters per result |
+| `max_chars_total` | 100,000 | 1,000~1,000,000 | Total max characters |
+| `max_results` | 10 | 1~20 | Max number of results |
 
-> **원칙:**
-> - 분당 60 프롬프트 기본 할당량.
-> - Parallel의 별도 이용약관이 적용된다.
-> - Pre-GA 서비스로 SLA가 없다.
+> **Rule:**
+> - Default quota: 60 prompts per minute.
+> - Parallel's separate terms of service apply.
+> - Pre-GA service — no SLA.
 
 ---
 
-## § 7. Enterprise Web Search 그라운딩
+## § 7. Enterprise Web Search Grounding
 
-### 언제: 의료·금융·공공 분야 등 컴플라이언스 규제 환경에서 웹 그라운딩이 필요할 때
+### When: web grounding is needed in compliance-regulated industries (healthcare, finance, public sector)
 
 ```python
 from google import genai
@@ -472,7 +472,7 @@ response = client.models.generate_content(
     contents="When is the next total solar eclipse in the United States?",
     config=GenerateContentConfig(
         tools=[
-            Tool(enterprise_web_search=EnterpriseWebSearch())   # 파라미터 없음
+            Tool(enterprise_web_search=EnterpriseWebSearch())   # no parameters
         ],
     ),
 )
@@ -480,18 +480,18 @@ response = client.models.generate_content(
 print(response.text)
 ```
 
-### Google Search vs Enterprise Web Search 비교
+### Google Search vs Enterprise Web Search
 
-| 항목 | Google Search | Enterprise Web Search |
+| Item | Google Search | Enterprise Web Search |
 |------|--------------|----------------------|
-| 인덱스 범위 | 전체 웹 (더 넓음) | 규제 산업 최적화 |
-| 최신성 | 실시간 | 6시간/24시간 업데이트 |
-| 데이터 로깅 | 표준 | 없음 |
-| VPC-SC 지원 | — | ✅ |
-| CMEK | — | 해당 없음 |
-| 일일 쿼리 제한 | — | 5,000 (Gemini 3 Pro/Pro Image) |
+| Index coverage | Full web (broader) | Optimized for regulated industries |
+| Freshness | Real-time | Updated every 6h / 24h |
+| Data logging | Standard | None |
+| VPC-SC support | — | ✅ |
+| CMEK | — | N/A |
+| Daily query limit | — | 5,000 (Gemini 3 Pro/Pro Image) |
 
-> **원칙:**
-> - `EnterpriseWebSearch()`는 파라미터가 없다.
-> - Search Suggestion(`webSearchQueries`)은 반드시 앱에 표시해야 한다.
-> - 컴플라이언스가 필요 없다면 더 넓은 인덱스를 제공하는 Google Search를 사용한다.
+> **Rule:**
+> - `EnterpriseWebSearch()` takes no parameters.
+> - Search Suggestions (`webSearchQueries`) must be displayed in the app.
+> - If compliance is not required, use Google Search for broader index coverage.

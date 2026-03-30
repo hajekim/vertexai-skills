@@ -1,47 +1,47 @@
 ---
 name: model-skills
 description: >
-  Vertex AI Studio 모델 선택 및 마이그레이션 가이드. 아래 키워드로 트리거된다:
-  "model selection", "모델 선택", "model lifecycle", "모델 라이프사이클",
-  "deprecated model", "deprecated 모델", "model migration", "모델 마이그레이션",
-  "gemini migration", "1.5 to 2.5", "model retirement", "모델 은퇴",
-  "which model", "어떤 모델", "모델 추천", "SDK migration", "SDK 마이그레이션"
+  Vertex AI Studio model selection and migration guide. Triggered by:
+  "model selection", "model lifecycle", "deprecated model", "model migration",
+  "gemini migration", "1.5 to 2.5", "model retirement", "which model",
+  "SDK migration". Korean: "모델 선택", "모델 라이프사이클", "deprecated 모델",
+  "모델 마이그레이션", "어떤 모델", "모델 추천", "SDK 마이그레이션", "모델 은퇴".
 version: 1.0.0
 ---
 
-# Model Skills — Vertex AI Studio 모델 선택 및 마이그레이션 가이드
+# Model Skills — Vertex AI Studio Model Selection and Migration Guide
 
-> 참고 문서: [Model versions and lifecycle](https://cloud.google.com/vertex-ai/generative-ai/docs/learn/model-versions) · [Migration guide](https://cloud.google.com/vertex-ai/generative-ai/docs/migrate)
-
----
-
-## 모델 라이프사이클 개념
-
-| 상태 | 의미 | 프로덕션 적합 여부 |
-|------|------|-----------------|
-| **Stable (GA)** | 공개 출시. 은퇴일 1개월 전부터 신규 접근 차단 | ✅ 권장 |
-| **Preview** | 기능 검증 중. API 변경 가능성 있음 | ⚠️ 비권장 |
-| **Deprecated** | 은퇴일 이후 404 오류 반환. 사용 불가 | ❌ 불가 |
+> Reference: [Model versions and lifecycle](https://cloud.google.com/vertex-ai/generative-ai/docs/learn/model-versions) · [Migration guide](https://cloud.google.com/vertex-ai/generative-ai/docs/migrate)
 
 ---
 
-## § 1. LLM 모델 선택
+## Model Lifecycle Concepts
 
-### 현재 Stable 모델 (2025년 기준)
+| Status | Meaning | Production Suitable |
+|--------|---------|-------------------|
+| **Stable (GA)** | Publicly released. New access blocked 1 month before retirement date | ✅ Recommended |
+| **Preview** | Under validation. API may change | ⚠️ Not recommended |
+| **Retired** | Returns 404 after retirement date. Unusable | ❌ Not available |
 
-| 모델 ID | 출시일 | 은퇴일 | 특징 |
-|---------|--------|--------|------|
-| `gemini-2.5-flash` | 2025-06-17 | 2026-06-17 | 속도·비용 균형 **(신규 프로젝트 기본 권장)** |
-| `gemini-2.5-pro` | 2025-06-17 | 2026-06-17 | 고품질 복잡한 추론 |
-| `gemini-2.5-flash-lite` | 2025-07-22 | 2026-07-22 | 경량, 비용 최적화 |
-| `gemini-2.0-flash-001` | 2025-02-05 | 2026-06-01 | 기존 프로젝트만 — 신규 사용 불가 (2026-03-06 이후) |
+---
 
-### Retired 모델 — 이미 서비스 종료, 즉시 교체 필요
+## § 1. LLM Model Selection
 
-> API 호출 시 **404 오류** 반환. 사용 중이라면 지금 바로 교체해야 한다.
+### Current Stable Models (as of 2025)
 
-| 모델 ID | 은퇴일 | 대체 모델 |
-|---------|--------|----------|
+| Model ID | Released | Retires | Description |
+|----------|----------|---------|-------------|
+| `gemini-2.5-flash` | 2025-06-17 | 2026-06-17 | Speed/cost balance **(recommended default for new projects)** |
+| `gemini-2.5-pro` | 2025-06-17 | 2026-06-17 | High-quality complex reasoning |
+| `gemini-2.5-flash-lite` | 2025-07-22 | 2026-07-22 | Lightweight, cost-optimized |
+| `gemini-2.0-flash-001` | 2025-02-05 | 2026-06-01 | Existing projects only — new use blocked since 2026-03-06 |
+
+### Retired Models — Already End-of-Life, Replace Immediately
+
+> API calls return **404 error**. Replace now if still in use.
+
+| Model ID | Retired | Replacement |
+|----------|---------|-------------|
 | `gemini-1.5-pro-001` | 2025-05-24 | `gemini-2.5-pro` |
 | `gemini-1.5-pro-002` | 2025-09-24 | `gemini-2.5-pro` |
 | `gemini-1.5-flash-001` | 2025-05-24 | `gemini-2.5-flash` |
@@ -50,88 +50,88 @@ version: 1.0.0
 | `gemini-1.0-pro-002` | 2025-04-21 | `gemini-2.5-flash` |
 | `gemini-1.0-pro-vision-001` | 2025-04-21 | `gemini-2.5-flash` |
 
-### 용도별 선택 기준
+### Selection by Use Case
 
 ```
-비용 최소화          → gemini-2.5-flash-lite
-속도·품질 균형 (기본) → gemini-2.5-flash      ← 대부분의 경우 이것
-고품질 추론          → gemini-2.5-pro
-사고 모델 (예산 제어) → gemini-2.5-flash / gemini-2.5-pro  (thinking_budget)
-사고 모델 (레벨 제어) → gemini-3-flash / gemini-3.1-pro    (thinking_level)
+Minimize cost              → gemini-2.5-flash-lite
+Speed/quality balance      → gemini-2.5-flash      ← most use cases
+High-quality reasoning     → gemini-2.5-pro
+Thinking (budget control)  → gemini-2.5-flash / gemini-2.5-pro  (thinking_budget)
+Thinking (level control)   → gemini-3-flash / gemini-3.1-pro    (thinking_level)
 ```
 
-### 자동 업데이트 별칭(Alias) 주의
+### Auto-update Alias Warning
 
-| 별칭 | 현재 가리키는 버전 | 주의사항 |
-|------|-----------------|---------|
-| `gemini-2.5-pro` | `gemini-2.5-pro-001` | 새 버전 출시 시 자동 업그레이드됨 |
-| `gemini-2.5-flash` | `gemini-2.5-flash-001` | 동일 |
-| `gemini-2.0-flash` | `gemini-2.0-flash-001` | 동일 |
+| Alias | Currently Points To | Warning |
+|-------|-------------------|---------|
+| `gemini-2.5-pro` | `gemini-2.5-pro-001` | Auto-upgrades when a new version is released |
+| `gemini-2.5-flash` | `gemini-2.5-flash-001` | Same |
+| `gemini-2.0-flash` | `gemini-2.0-flash-001` | Same |
 
-> **프로덕션에서는 별칭 대신 `gemini-2.5-flash-001` 같은 버전 고정 ID 사용 권장.** 별칭은 자동 업그레이드되어 동작이 바뀔 수 있다.
+> **In production, use pinned version IDs like `gemini-2.5-flash-001` instead of aliases.** Aliases auto-upgrade and may change behavior.
 
 ---
 
-## § 2. 이미지 모델 선택
+## § 2. Image Model Selection
 
-### 현재 Stable 모델
+### Current Stable Models
 
-| 모델 ID | API | 출시일 | 은퇴일 | 특징 |
-|---------|-----|--------|--------|------|
-| `imagen-4.0-generate-001` | `generate_images()` | 2025-08-14 | 2026-06-30 | 최고 품질 정적 이미지 **(권장)** |
-| `imagen-3.0-generate-002` | `generate_images()` | 2025-01-29 | 2026-06-30 | Imagen 3 안정 버전 |
-| `gemini-2.5-flash-image` | `generate_content()` | — | — | 이미지 생성+편집, 경량 |
+| Model ID | API | Released | Retires | Description |
+|----------|-----|----------|---------|-------------|
+| `imagen-4.0-generate-001` | `generate_images()` | 2025-08-14 | 2026-06-30 | Highest quality static images **(recommended)** |
+| `imagen-3.0-generate-002` | `generate_images()` | 2025-01-29 | 2026-06-30 | Imagen 3 stable version |
+| `gemini-2.5-flash-image` | `generate_content()` | — | — | Image generation + editing, lightweight |
 
-### Preview 모델 (프로덕션 비권장)
+### Preview Models (not recommended for production)
 
-| 모델 ID | API | 특징 |
-|---------|-----|------|
-| `gemini-3-pro-image-preview` | `generate_content()` | 최고 품질 생성+편집 |
-| `gemini-3.1-flash-image-preview` | `generate_content()` | 최신, 빠른 생성+편집 |
+| Model ID | API | Description |
+|----------|-----|-------------|
+| `gemini-3-pro-image-preview` | `generate_content()` | Highest quality generation + editing |
+| `gemini-3.1-flash-image-preview` | `generate_content()` | Latest, fast generation + editing |
 
-### 용도별 선택 기준
-
-```
-최고 품질 정적 이미지    → imagen-4.0-generate-001   (generate_images)
-이미지 생성 + 텍스트 혼합 → gemini-2.5-flash-image    (generate_content)
-최신 편집 기능 (실험적)  → gemini-3.1-flash-image-preview
-```
-
----
-
-## § 3. 비디오 모델 선택
-
-### 현재 Stable 모델
-
-| 모델 ID | 출시일 | 은퇴일 | 특징 |
-|---------|--------|--------|------|
-| `veo-3.1-generate-001` | 2025-11-17 | 미정 | 최신 안정 버전 **(권장)** |
-| `veo-3.1-fast-generate-001` | 2025-11-17 | 미정 | 빠른 생성, 낮은 비용 |
-| `veo-3.0-generate-001` | 2025-07-29 | 2026-06-30 | 이전 안정 버전 |
-| `veo-2.0-generate-001` | — | — | 객체 삽입/제거, `enhance_prompt` 전용 |
-
-### 용도별 선택 기준
+### Selection by Use Case
 
 ```
-일반 비디오 생성         → veo-3.1-generate-001
-빠른 생성 / 비용 절약    → veo-3.1-fast-generate-001
-객체 삽입·제거           → veo-2.0-generate-001  (이 기능은 2.0 전용)
-enhance_prompt 사용      → veo-2.0-generate-001
+Highest quality static images       → imagen-4.0-generate-001   (generate_images)
+Image generation + mixed with text  → gemini-2.5-flash-image    (generate_content)
+Latest editing features (experimental) → gemini-3.1-flash-image-preview
 ```
 
 ---
 
-## § 4. 마이그레이션 가이드
+## § 3. Video Model Selection
 
-### 4-1. SDK 마이그레이션 (필수)
+### Current Stable Models
 
-Vertex AI SDK(`google-cloud-aiplatform`)는 2026년 6월 이후 Gemini를 지원하지 않는다. Gen AI SDK로 전환해야 한다.
+| Model ID | Released | Retires | Description |
+|----------|----------|---------|-------------|
+| `veo-3.1-generate-001` | 2025-11-17 | TBD | Latest stable version **(recommended)** |
+| `veo-3.1-fast-generate-001` | 2025-11-17 | TBD | Faster generation, lower cost |
+| `veo-3.0-generate-001` | 2025-07-29 | 2026-06-30 | Previous stable version |
+| `veo-2.0-generate-001` | — | — | Object insert/remove and `enhance_prompt` only |
+
+### Selection by Use Case
+
+```
+General video generation      → veo-3.1-generate-001
+Fast generation / cost saving → veo-3.1-fast-generate-001
+Object insert or remove       → veo-2.0-generate-001  (exclusive to 2.0)
+enhance_prompt usage          → veo-2.0-generate-001
+```
+
+---
+
+## § 4. Migration Guide
+
+### 4-1. SDK Migration (Required)
+
+The Vertex AI SDK (`google-cloud-aiplatform`) will stop supporting Gemini after June 2026. Migrate to the Gen AI SDK.
 
 ```bash
-# 기존 SDK 제거
+# Remove old SDK
 pip uninstall google-cloud-aiplatform
 
-# Gen AI SDK 설치
+# Install Gen AI SDK
 pip install --upgrade google-genai
 ```
 
@@ -155,26 +155,26 @@ response = client.models.generate_content(
 )
 ```
 
-### 4-2. 모델 ID 변경
+### 4-2. Model ID Changes
 
 ```python
-# 1.5 → 2.5 직접 교체 (1.5는 이미 모두 은퇴 — 404 반환 중)
-"gemini-1.5-flash-001"  →  "gemini-2.5-flash"   # 2025-05-24 종료
-"gemini-1.5-flash-002"  →  "gemini-2.5-flash"   # 2025-09-24 종료
-"gemini-1.5-pro-001"    →  "gemini-2.5-pro"     # 2025-05-24 종료
-"gemini-1.5-pro-002"    →  "gemini-2.5-pro"     # 2025-09-24 종료
+# 1.5 → 2.5 direct replacement (1.5 is fully retired — returning 404)
+"gemini-1.5-flash-001"  →  "gemini-2.5-flash"   # retired 2025-05-24
+"gemini-1.5-flash-002"  →  "gemini-2.5-flash"   # retired 2025-09-24
+"gemini-1.5-pro-001"    →  "gemini-2.5-pro"     # retired 2025-05-24
+"gemini-1.5-pro-002"    →  "gemini-2.5-pro"     # retired 2025-09-24
 
-# 1.0 → 2.5 (1.0은 2025-04-21 이미 종료)
+# 1.0 → 2.5 (1.0 retired 2025-04-21)
 "gemini-1.0-pro-001"         →  "gemini-2.5-flash"
 "gemini-1.0-pro-vision-001"  →  "gemini-2.5-flash"
 
-# 2.0 → 2.5 (신규 프로젝트 — 2026-03-06부터 신규 접근 차단)
+# 2.0 → 2.5 (new projects — new access blocked since 2026-03-06)
 "gemini-2.0-flash-001"  →  "gemini-2.5-flash"
 ```
 
-### 4-3. Breaking Changes 체크리스트
+### 4-3. Breaking Changes Checklist
 
-#### thinking 파라미터 (Gemini 3 이상으로 업그레이드 시)
+#### Thinking parameter (when upgrading to Gemini 3 or later)
 
 ```python
 # Before (Gemini 2.5 — thinking_budget)
@@ -192,20 +192,20 @@ config = GenerateContentConfig(
 )
 ```
 
-#### Top-K 파라미터 제거 (Gemini 1.0 Pro Vision 이후 미지원)
+#### Remove Top-K parameter (not supported after Gemini 1.0 Pro Vision)
 
 ```python
 # Before
-config = GenerateContentConfig(top_k=40)  # 일부 모델에서 동작
+config = GenerateContentConfig(top_k=40)  # worked on some models
 
-# After — top_k 제거, temperature/top_p만 사용
+# After — remove top_k, use only temperature / top_p
 config = GenerateContentConfig(
     temperature=1.0,
     top_p=0.95,
 )
 ```
 
-#### Dynamic Retrieval → Google Search Grounding 전환
+#### Dynamic Retrieval → Google Search Grounding
 
 ```python
 # Before (Dynamic Retrieval — deprecated)
@@ -221,51 +221,51 @@ from google.genai.types import GoogleSearch, Tool
 tool = Tool(google_search=GoogleSearch())
 ```
 
-#### temperature 기본값 주의 (Gemini 3 이상)
+#### temperature default warning (Gemini 3 and later)
 
 ```python
-# Gemini 3+ 모델은 temperature 기본값 1.0 유지 권장
-# 낮은 값으로 변경 시 반복 응답 또는 성능 저하 가능
+# Gemini 3+ models: keep temperature default at 1.0
+# Lowering it may cause repetitive responses or performance degradation
 
 config = GenerateContentConfig(
-    temperature=1.0,  # 명시적으로 1.0 설정 (기본값 유지)
+    temperature=1.0,  # explicitly set to 1.0 (maintain default)
 )
 ```
 
-### 4-4. 권장 마이그레이션 절차 (7단계)
+### 4-4. Recommended Migration Procedure (7 steps)
 
 ```
-1. 평가 요구사항 문서화
-   └─ 기존 평가 데이터 수집, RAG/Tool use/Agent 컴포넌트별 정리
+1. Document evaluation requirements
+   └─ Collect existing eval data; organize by RAG/Tool use/Agent component
 
-2. 코드 업그레이드
-   └─ Gen AI SDK 전환 → 모델 ID 변경 → Breaking changes 수정
+2. Upgrade code
+   └─ Switch to Gen AI SDK → update model IDs → fix breaking changes
 
-3. 오프라인 평가
-   └─ 기존 평가 반복 수행 (Gen AI Evaluation Service 활용)
+3. Run offline evaluation
+   └─ Repeat existing evaluations (use Gen AI Evaluation Service)
 
-4. 프롬프트 조정
-   └─ Hill climbing으로 반복 개선, system instruction 점검 (모순 제거)
+4. Adjust prompts
+   └─ Iterative improvement via hill climbing; review system instructions (remove contradictions)
 
-5. 로드 테스트
-   └─ Provisioned Throughput 사전 구매 여부 확인
+5. Load test
+   └─ Confirm whether to pre-purchase Provisioned Throughput
 
-6. 온라인 평가 (선택)
-   └─ A/B 테스트 또는 Canary 배포
+6. Online evaluation (optional)
+   └─ A/B test or canary deployment
 
-7. 프로덕션 배포
+7. Production deployment
 ```
 
-### 4-5. 마이그레이션 전 확인사항
+### 4-5. Pre-migration Checklist
 
-| 항목 | 내용 |
-|------|------|
-| **보안·컴플라이언스** | InfoSec/규제 승인 선행 |
-| **지역 가용성** | 모델별 지원 리전 확인 (`us-central1` 권장) |
-| **가격 변경** | Gemini 2+ 모델은 문자 기반 → 토큰 기반 청구 |
-| **Fine-tuning** | 기존 튜닝 모델 재사용 불가, 새 튜닝 필요 |
-| **이미지/PDF 토큰화** | Gemini 3+에서 Pan and Scan → 가변 시퀀스 길이로 변경 |
-| **PDF 처리** | Gemini 3+에서 OCR 기본값 비활성화 |
-| **Image Segmentation** | Gemini 3+에서 미지원 |
+| Item | Details |
+|------|---------|
+| **Security & compliance** | Obtain InfoSec/regulatory approval first |
+| **Regional availability** | Check supported regions per model (`us-central1` recommended) |
+| **Pricing change** | Gemini 2+ models bill by token, not character |
+| **Fine-tuning** | Existing tuned models cannot be reused; new tuning required |
+| **Image/PDF tokenization** | Gemini 3+: Pan and Scan → variable sequence length |
+| **PDF processing** | Gemini 3+: OCR disabled by default |
+| **Image Segmentation** | Not supported on Gemini 3+ |
 
-> **주의:** 철저한 테스트 없이 전체 마이그레이션을 한 번에 진행하지 말 것. 단계적 전환 권장.
+> **Warning:** Do not perform a full migration all at once without thorough testing. Gradual rollout is recommended.

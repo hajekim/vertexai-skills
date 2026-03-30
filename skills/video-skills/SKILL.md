@@ -1,57 +1,57 @@
 ---
 name: video-skills
-description: Use when working with video generation on Vertex AI using google-genai Python SDK — imports Veo models, or requests involving "video generation", "generate video", "text to video", "image to video", "extend video", "Veo". 한국어: "비디오 생성", "영상 만들기", "텍스트로 영상", "이미지로 영상", "비오", "영상 연장".
+description: Use when working with video generation on Vertex AI using google-genai Python SDK — imports Veo models, or requests involving "video generation", "generate video", "text to video", "image to video", "extend video", "Veo". Korean: "비디오 생성", "영상 만들기", "텍스트로 영상", "이미지로 영상", "비오", "영상 연장".
 version: 1.0.0
 ---
 
-# Video Skills — google-genai Python SDK 레퍼런스
+# Video Skills — google-genai Python SDK Reference
 
-## 환경 설정
+## Environment Setup
 
-### 라이브러리 설치
+### Install Libraries
 
 ```bash
 pip install --upgrade google-genai
 ```
 
-### 필수 환경변수 및 GCS 버킷
+### Required Environment Variables and GCS Bucket
 
 ```bash
 export GOOGLE_CLOUD_PROJECT="your-project-id"
 export GOOGLE_CLOUD_LOCATION="us-central1"
 export GOOGLE_GENAI_USE_VERTEXAI="True"
-# 생성된 비디오는 GCS 버킷에 저장됨 — 필수
+# Generated videos are stored in a GCS bucket — required
 export OUTPUT_GCS_URI="gs://your-bucket/output/"
 ```
 
-### 클라이언트 초기화
+### Client Initialization
 
 ```python
 from google import genai
 from google.genai.types import HttpOptions
 
 client = genai.Client(http_options=HttpOptions(api_version="v1"))
-output_gcs_uri = "gs://your-bucket/output/"  # 모든 생성 작업에 필요
+output_gcs_uri = "gs://your-bucket/output/"  # required for all generation operations
 ```
 
-### 모델 목록
+### Model List
 
-| 모델 | 특징 |
-|------|------|
-| `veo-3.1-generate-001` | 최신 안정 버전 (권장) |
-| `veo-3.1-fast-generate-001` | 빠른 생성 |
-| `veo-3.0-generate-001` | 이전 안정 버전 |
-| `veo-2.0-generate-001` | 레거시 (객체 삽입/제거 전용) |
+| Model | Description |
+|-------|-------------|
+| `veo-3.1-generate-001` | Latest stable version (recommended) |
+| `veo-3.1-fast-generate-001` | Faster generation |
+| `veo-3.0-generate-001` | Previous stable version |
+| `veo-2.0-generate-001` | Legacy (object insert/remove only) |
 
-### 공통 패턴: 폴링 루프
+### Common Pattern: Polling Loop
 
-모든 비디오 생성은 비동기 LRO(Long Running Operation)로 동작한다:
+All video generation runs as an async LRO (Long Running Operation):
 
 ```python
 import time
 
-# operation = client.models.generate_videos(...)  # 작업 시작
-# 완료까지 대기
+# operation = client.models.generate_videos(...)  # start the job
+# Wait until complete
 while not operation.done:
     time.sleep(15)
     operation = client.operations.get(operation)
@@ -60,13 +60,13 @@ for video in operation.result.generated_videos:
     print(video.video.uri)  # GCS URI
 ```
 
-> **원칙:** 비디오 생성은 항상 비동기다. `operation.done`이 True가 될 때까지 15초 간격으로 폴링한다.
+> **Rule:** Video generation is always async. Poll every 15 seconds until `operation.done` is True.
 
 ---
 
-## § 1. 텍스트 → 비디오
+## § 1. Text to Video
 
-### 언제: 텍스트 프롬프트만으로 비디오를 생성할 때
+### When: generating video from a text prompt only
 
 ```python
 import time
@@ -80,14 +80,14 @@ operation = client.models.generate_videos(
     model="veo-3.1-generate-001",
     prompt="A cat reading a book in a cozy library, warm lighting, cinematic shot",
     config=GenerateVideosConfig(
-        aspect_ratio="16:9",       # "16:9" (가로) 또는 "9:16" (세로/모바일)
-        number_of_videos=1,        # 생성할 비디오 수 (1-4)
-        duration_seconds=8,        # 비디오 길이 (4, 6, 8 중 선택)
+        aspect_ratio="16:9",       # "16:9" (landscape) or "9:16" (portrait/mobile)
+        number_of_videos=1,        # number of videos to generate (1–4)
+        duration_seconds=8,        # video duration (4, 6, or 8 seconds)
         output_gcs_uri=output_gcs_uri,
     ),
 )
 
-# 완료까지 대기
+# Wait until complete
 while not operation.done:
     time.sleep(15)
     operation = client.operations.get(operation)
@@ -96,23 +96,23 @@ for video in operation.result.generated_videos:
     print(video.video.uri)   # gs://your-bucket/output/xxx.mp4
 ```
 
-### 파라미터 가이드
+### Parameter Guide
 
-| 파라미터 | 값 | 설명 |
-|---------|-----|------|
-| `aspect_ratio` | `"16:9"` / `"9:16"` | 가로형 / 세로형(모바일) |
-| `number_of_videos` | 1-4 | 생성할 비디오 수 |
-| `duration_seconds` | 4, 6, 8 | 길이 (초) |
+| Parameter | Values | Description |
+|-----------|--------|-------------|
+| `aspect_ratio` | `"16:9"` / `"9:16"` | Landscape / Portrait (mobile) |
+| `number_of_videos` | 1–4 | Number of videos to generate |
+| `duration_seconds` | 4, 6, 8 | Duration in seconds |
 
-> **원칙:**
-> - `output_gcs_uri`는 필수다. 비디오는 로컬이 아닌 GCS에 저장된다.
-> - 생성 시간은 보통 2-5분 소요된다.
+> **Rule:**
+> - `output_gcs_uri` is required. Videos are stored in GCS, not locally.
+> - Generation typically takes 2–5 minutes.
 
 ---
 
-## § 2. 이미지 → 비디오
+## § 2. Image to Video
 
-### 언제: 정적 이미지에 움직임을 추가하여 비디오로 만들 때
+### When: adding motion to a static image to create a video
 
 ```python
 import time
@@ -126,8 +126,8 @@ operation = client.models.generate_videos(
     model="veo-3.1-generate-001",
     prompt="The flowers sway gently in the breeze, petals trembling",
     image=Image(
-        gcs_uri="gs://your-bucket/input/flowers.png",   # GCS 경로 필수
-        mime_type="image/png",                           # "image/png" 또는 "image/jpeg"
+        gcs_uri="gs://your-bucket/input/flowers.png",   # GCS path required
+        mime_type="image/png",                           # "image/png" or "image/jpeg"
     ),
     config=GenerateVideosConfig(
         aspect_ratio="16:9",
@@ -143,16 +143,16 @@ for video in operation.result.generated_videos:
     print(video.video.uri)
 ```
 
-> **원칙:**
-> - 입력 이미지는 반드시 GCS에 업로드 후 `gcs_uri`로 참조한다.
-> - 권장 해상도: 720p 이상.
-> - 프롬프트는 이미지에 추가할 **동작(motion)**만 설명한다. 이미지 내용을 재설명하지 않는다.
+> **Rule:**
+> - Input image must be uploaded to GCS and referenced via `gcs_uri`.
+> - Recommended resolution: 720p or higher.
+> - The prompt should describe only the **motion** to add. Do not re-describe the image content.
 
 ---
 
-## § 3. 첫/마지막 프레임으로 비디오
+## § 3. First / Last Frame Video
 
-### 언제: 시작 이미지와 끝 이미지 사이의 전환을 자동 생성할 때
+### When: automatically generating the transition between a start image and an end image
 
 ```python
 import time
@@ -166,13 +166,13 @@ operation = client.models.generate_videos(
     model="veo-3.1-generate-001",
     prompt="A smooth natural transition, cinematic feel",
     image=Image(
-        gcs_uri="gs://your-bucket/first-frame.png",   # 시작 프레임
+        gcs_uri="gs://your-bucket/first-frame.png",   # first frame
         mime_type="image/png",
     ),
     config=GenerateVideosConfig(
         aspect_ratio="16:9",
         last_frame=Image(
-            gcs_uri="gs://your-bucket/last-frame.png",   # 마지막 프레임
+            gcs_uri="gs://your-bucket/last-frame.png",   # last frame
             mime_type="image/png",
         ),
         output_gcs_uri=output_gcs_uri,
@@ -187,16 +187,16 @@ for video in operation.result.generated_videos:
     print(video.video.uri)
 ```
 
-> **원칙:**
-> - `image` (첫 프레임)은 `generate_videos()` 직접 파라미터로 전달한다.
-> - `last_frame` (마지막 프레임)은 `GenerateVideosConfig` 안에 전달한다.
-> - 두 이미지의 해상도와 비율을 일치시킨다.
+> **Rule:**
+> - `image` (first frame) is passed directly to `generate_videos()`.
+> - `last_frame` (last frame) is passed inside `GenerateVideosConfig`.
+> - Match the resolution and aspect ratio of both images.
 
 ---
 
-## § 4. 비디오 연장 (Extend)
+## § 4. Video Extension
 
-### 언제: 기존 비디오를 자연스럽게 이어서 늘릴 때
+### When: naturally extending an existing video
 
 ```python
 import time
@@ -210,7 +210,7 @@ operation = client.models.generate_videos(
     model="veo-3.1-generate-001",
     prompt="Continue the scene naturally, same lighting and style",
     video=Video(
-        uri="gs://your-bucket/input/original.mp4",   # 원본 비디오 GCS 경로
+        uri="gs://your-bucket/input/original.mp4",   # source video GCS path
         mime_type="video/mp4",
     ),
     config=GenerateVideosConfig(
@@ -226,33 +226,33 @@ for video in operation.result.generated_videos:
     print(video.video.uri)
 ```
 
-### 입력 비디오 요구사항
+### Input Video Requirements
 
-| 항목 | 조건 |
-|------|------|
-| 포맷 | MP4 전용 |
-| 길이 | 1-30초 |
-| 프레임레이트 | 24fps |
-| 해상도 | 720p, 1080p, 4K |
-| 비율 | 9:16 또는 16:9 |
+| Item | Condition |
+|------|-----------|
+| Format | MP4 only |
+| Duration | 1–30 seconds |
+| Frame rate | 24fps |
+| Resolution | 720p, 1080p, 4K |
+| Aspect ratio | 9:16 or 16:9 |
 
-### 출력 사양
+### Output Specs
 
-- 포맷: MP4
-- 연장 길이: 7초
-- 해상도/비율: 입력과 동일 유지
+- Format: MP4
+- Extension length: 7 seconds
+- Resolution / aspect ratio: matches input
 
-> **원칙:**
-> - `Video` 객체에 `uri`(GCS)와 `mime_type="video/mp4"`를 반드시 명시한다.
-> - 프롬프트는 원본 스타일을 유지한다는 것을 명시한다.
+> **Rule:**
+> - The `Video` object must specify both `uri` (GCS) and `mime_type="video/mp4"`.
+> - The prompt should explicitly state to maintain the original style.
 
 ---
 
-## § 5. 고급 기법
+## § 5. Advanced Techniques
 
-### 5-1. 레퍼런스 이미지로 스타일/캐릭터 가이드
+### 5-1. Reference Image for Style / Character Consistency
 
-인물, 캐릭터, 제품의 외관을 일관되게 유지하거나 특정 스타일을 적용할 때:
+Use when you need to maintain consistent appearance of a person, character, or product, or apply a specific style:
 
 ```python
 import time
@@ -277,7 +277,7 @@ operation = client.models.generate_videos(
                     gcs_uri="gs://your-bucket/person.png",
                     mime_type="image/png",
                 ),
-                reference_type="asset",   # "asset": 인물/캐릭터/제품 외관 유지
+                reference_type="asset",   # "asset": preserve person/character/product appearance
             ),
         ],
         aspect_ratio="16:9",
@@ -293,14 +293,14 @@ for video in operation.result.generated_videos:
     print(video.video.uri)
 ```
 
-| `reference_type` | 용도 | 지원 모델 |
-|-----------------|------|---------|
-| `"asset"` | 인물/캐릭터/제품 외관 유지 | veo-3.1 |
-| `"style"` | 영상 아트 스타일 적용 | veo-2.0 전용 |
+| `reference_type` | Use Case | Supported Models |
+|-----------------|----------|-----------------|
+| `"asset"` | Preserve person/character/product appearance | veo-3.1 |
+| `"style"` | Apply video art style | veo-2.0 only |
 
-### 5-2. 객체 삽입 (Insert Objects)
+### 5-2. Insert Objects
 
-> **주의:** `veo-2.0-generate-001` 전용 기능
+> **Note:** `veo-2.0-generate-001` only
 
 ```python
 import time
@@ -327,7 +327,7 @@ operation = client.models.generate_videos(
     config=GenerateVideosConfig(
         mask=VideoGenerationMask(
             image=Image(
-                gcs_uri="gs://your-bucket/mask.png",   # 삽입 위치 마스크
+                gcs_uri="gs://your-bucket/mask.png",   # mask marking insertion area
                 mime_type="image/png",
             ),
             mask_mode=VideoGenerationMaskMode.INSERT,
@@ -344,9 +344,9 @@ for video in operation.result.generated_videos:
     print(video.video.uri)
 ```
 
-### 5-3. 객체 제거 (Remove Objects)
+### 5-3. Remove Objects
 
-> **주의:** `veo-2.0-generate-001` 전용 기능
+> **Note:** `veo-2.0-generate-001` only
 
 ```python
 import time
@@ -373,7 +373,7 @@ operation = client.models.generate_videos(
     config=GenerateVideosConfig(
         mask=VideoGenerationMask(
             image=Image(
-                gcs_uri="gs://your-bucket/mask.png",   # 제거 대상 마스크
+                gcs_uri="gs://your-bucket/mask.png",   # mask marking the object to remove
                 mime_type="image/png",
             ),
             mask_mode=VideoGenerationMaskMode.REMOVE,
@@ -390,69 +390,69 @@ for video in operation.result.generated_videos:
     print(video.video.uri)
 ```
 
-> **원칙:**
-> - 레퍼런스 이미지는 최대 3개까지 제공 가능 (asset 타입).
-> - 객체 삽입/제거는 `veo-2.0-generate-001`에서만 지원된다.
-> - 마스크 이미지는 PNG/JPEG/WebP 형식이며, 대상 영역을 흰색으로 표시한다.
+> **Rule:**
+> - Up to 3 reference images can be provided (asset type).
+> - Object insert/remove is only supported on `veo-2.0-generate-001`.
+> - Mask images must be PNG/JPEG/WebP; mark the target area in white.
 
 ---
 
-## § 6. 프롬프트 가이드 & Best Practices
+## § 6. Prompt Guide & Best Practices
 
-### 프롬프트 7가지 구성 요소
+### 7 Components of a Video Prompt
 
-| 요소 | 설명 | 예시 |
-|------|------|------|
-| **Subject** | 주인공/대상 | `"a seasoned detective"`, `"a golden retriever"` |
-| **Action** | 동작/움직임 | `"walking slowly"`, `"leaves rustling"` |
-| **Scene** | 배경/환경 | `"foggy Victorian street at night"` |
-| **Camera angle** | 카메라 각도 | `"low-angle shot"`, `"bird's-eye view"`, `"Dutch angle"` |
-| **Camera movement** | 카메라 움직임 | `"slow pan left"`, `"dolly zoom"`, `"aerial drone shot"` |
-| **Visual style** | 시각 스타일 | `"photorealistic"`, `"anime style"`, `"cinematic lighting"` |
-| **Temporal** | 시간 효과 | `"slow motion"`, `"time-lapse"`, `"fast-paced"` |
+| Component | Description | Example |
+|-----------|-------------|---------|
+| **Subject** | Main character or object | `"a seasoned detective"`, `"a golden retriever"` |
+| **Action** | Movement or behavior | `"walking slowly"`, `"leaves rustling"` |
+| **Scene** | Background or environment | `"foggy Victorian street at night"` |
+| **Camera angle** | Camera perspective | `"low-angle shot"`, `"bird's-eye view"`, `"Dutch angle"` |
+| **Camera movement** | Camera motion | `"slow pan left"`, `"dolly zoom"`, `"aerial drone shot"` |
+| **Visual style** | Aesthetic style | `"photorealistic"`, `"anime style"`, `"cinematic lighting"` |
+| **Temporal** | Time effects | `"slow motion"`, `"time-lapse"`, `"fast-paced"` |
 
-### 프롬프트 작성 원칙
+### Prompt Writing Guidelines
 
-**구체적이고 명확하게:**
+**Be specific and clear:**
 ```
-# 나쁜 예
+# Bad
 "a man looking sad"
 
-# 좋은 예
+# Good
 "Low-angle close-up shot of a man with a somber expression, rain falling in background, cinematic lighting"
 ```
 
-**대화/발화 표현:**
+**Dialogue expression:**
 ```
-# 나쁜 예 (따옴표 사용)
+# Bad (using quotes)
 'A woman saying "My name is Clara"'
 
-# 좋은 예 (콜론 사용)
+# Good (using colon)
 "A woman says: My name is Clara"
 ```
 
-**한 씬에 집중:**
-- 여러 장면을 한 프롬프트에 담지 않는다
-- 각 비디오는 단일 장면으로 제한한다
+**Focus on one scene:**
+- Do not include multiple scenes in one prompt
+- Limit each video to a single scene
 
-**이미지→비디오 시:**
-- 소스 이미지 내용을 재설명하지 않는다
-- 추가할 **동작(motion)**만 설명한다
+**For image-to-video:**
+- Do not re-describe the source image content
+- Only describe the **motion** to add
 
-### 프롬프트 리라이터 끄기
+### Disabling the Prompt Rewriter
 
-> **주의:** `veo-2.0-generate-001`에서만 지원. Veo 3/3.1은 비활성화 불가.
+> **Note:** Only supported on `veo-2.0-generate-001`. Cannot be disabled on Veo 3/3.1.
 
 ```python
 config=GenerateVideosConfig(
-    enhance_prompt=False,    # 기본값 True (모델이 프롬프트를 자동 개선)
+    enhance_prompt=False,    # default True (model auto-improves the prompt)
     output_gcs_uri=output_gcs_uri,
 )
 ```
 
-리라이터를 끄면 출력 품질과 프롬프트 반영도가 낮아질 수 있다.
+Disabling the rewriter may reduce output quality and prompt fidelity.
 
-### Gemini로 프롬프트 개선하기
+### Improving Prompts with Gemini
 
 ```python
 from google import genai
@@ -467,23 +467,23 @@ refined = text_client.models.generate_content(
         system_instruction="You are a Veo video prompt expert. Make prompts cinematic, specific, and detailed. Keep under 200 words.",
     ),
 )
-print(refined.text)  # 개선된 프롬프트를 veo에 전달
+print(refined.text)  # pass the refined prompt to Veo
 ```
 
 ---
 
 ## § 7. Responsible AI & Safety
 
-### 금지 콘텐츠
+### Prohibited Content
 
-Generative AI Prohibited Use Policy에 의해 금지:
-- 아동 안전 위협 콘텐츠
-- 폭력적/극단적 콘텐츠
-- 성적으로 노골적인 콘텐츠
-- 혐오 발언 / 독성 언어
-- 유명인/실존 인물의 무단 사실적 표현
+Prohibited under the Generative AI Prohibited Use Policy:
+- Child safety threats
+- Violent or extremist content
+- Sexually explicit content
+- Hate speech / toxic language
+- Unauthorized realistic depictions of celebrities or real individuals
 
-### Safety 필터 에러 처리
+### Handling Safety Filter Errors
 
 ```python
 import time
@@ -503,21 +503,21 @@ while not operation.done:
     time.sleep(15)
     operation = client.operations.get(operation)
 
-# 결과 확인 및 Safety 에러 처리
+# Check result and handle safety errors
 if operation.result and operation.result.generated_videos:
     for video in operation.result.generated_videos:
         print(video.video.uri)
 elif operation.error:
     print(f"Error: {operation.error.message}")
-    # Safety 관련 에러 코드 예시:
-    # 58061214 / 17301594 → 아동 안전
-    # 90789179 / 43188360 → 성적 콘텐츠
-    # 61493863 / 56562880 → 폭력
-    # 57734940 / 22137204 → 혐오 발언
-    # 29310472 / 15236754 → 유명인 묘사
+    # Example safety-related error codes:
+    # 58061214 / 17301594 → child safety
+    # 90789179 / 43188360 → sexual content
+    # 61493863 / 56562880 → violence
+    # 57734940 / 22137204 → hate speech
+    # 29310472 / 15236754 → celebrity depiction
 ```
 
-> **원칙:**
-> - Safety 필터로 차단된 경우 프롬프트를 수정한다.
-> - 일부 비디오만 차단되고 나머지는 반환될 수 있다 (partial results).
-> - 유명인/실존 인물의 사실적 표현은 별도 승인이 필요하다.
+> **Rule:**
+> - If blocked by a safety filter, revise the prompt.
+> - Some videos may be blocked while others are returned (partial results).
+> - Realistic depictions of celebrities or real individuals require separate approval.

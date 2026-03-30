@@ -1,28 +1,28 @@
 ---
 name: text-skills
-description: Use when working with google-genai Python SDK on Vertex AI — code imports `from google import genai`, or requests involving "text generation", "chat", "function calling", "structured output", "code execution", "system instruction", "generation parameters". 한국어: "텍스트 생성", "함수 호출", "구조화된 출력", "코드 실행", "시스템 지시", "생성 파라미터", "채팅".
+description: Use when working with google-genai Python SDK on Vertex AI — code imports `from google import genai`, or requests involving "text generation", "chat", "function calling", "structured output", "code execution", "system instruction", "generation parameters". Korean: "텍스트 생성", "함수 호출", "구조화된 출력", "코드 실행", "시스템 지시", "생성 파라미터", "채팅".
 version: 1.0.0
 ---
 
-# Text Skills — google-genai Python SDK 레퍼런스
+# Text Skills — google-genai Python SDK Reference
 
-## 환경 설정
+## Environment Setup
 
-### 라이브러리 설치
+### Install Libraries
 
 ```bash
-pip install --upgrade google-genai   # 최신 안정 버전: 1.69.0 (2026-03 기준)
+pip install --upgrade google-genai   # latest stable: 1.69.0 (as of 2026-03)
 ```
 
-### 필수 환경변수
+### Required Environment Variables
 
 ```bash
 export GOOGLE_CLOUD_PROJECT="your-project-id"
-export GOOGLE_CLOUD_LOCATION="us-central1"   # "global"은 일부 모델만 지원
+export GOOGLE_CLOUD_LOCATION="us-central1"   # "global" only supported by some models
 export GOOGLE_GENAI_USE_VERTEXAI="True"
 ```
 
-### 클라이언트 초기화 (모듈 수준에서 한 번만)
+### Client Initialization (once at module level)
 
 ```python
 from google import genai
@@ -31,7 +31,7 @@ from google.genai.types import HttpOptions
 client = genai.Client(http_options=HttpOptions(api_version="v1"))
 ```
 
-### 대안: 직접 프로젝트 지정
+### Alternative: Explicit Project Configuration
 
 ```python
 client = genai.Client(
@@ -41,16 +41,16 @@ client = genai.Client(
 )
 ```
 
-> **원칙:** `client`는 모듈 최상단에서 한 번 초기화한다. 함수마다 재생성하지 않는다.
-> 모든 설정은 `GenerateContentConfig`에 통합한다.
+> **Rule:** Initialize `client` once at the top of the module. Never recreate it per function call.
+> Consolidate all settings into `GenerateContentConfig`.
 
 ---
 
-## § 1. 텍스트 생성
+## § 1. Text Generation
 
-### 언제: 단순 텍스트 응답이 필요할 때
+### When: simple text response needed
 
-### 논스트리밍
+### Non-streaming
 
 ```python
 from google import genai
@@ -65,7 +65,7 @@ response = client.models.generate_content(
 print(response.text)
 ```
 
-### 스트리밍 (멀티턴 채팅)
+### Streaming (multi-turn chat)
 
 ```python
 chat = client.chats.create(model="gemini-2.5-flash")
@@ -73,20 +73,20 @@ chat = client.chats.create(model="gemini-2.5-flash")
 for chunk in chat.send_message_stream("Why is the sky blue?"):
     print(chunk.text, end="")
 
-# 이어서 대화 계속
+# Continue the conversation
 for chunk in chat.send_message_stream("Tell me more."):
     print(chunk.text, end="")
 ```
 
-> **선택 기준:**
-> - 응답을 즉시 화면에 표시해야 하면 → 스트리밍
-> - 응답 전체를 처리한 후 사용해야 하면 → 논스트리밍
+> **When to choose:**
+> - Display response incrementally → streaming
+> - Process the full response before using it → non-streaming
 
 ---
 
-## § 2. 시스템 지시 (System Instruction)
+## § 2. System Instruction
 
-### 언제: 모델의 역할, 말투, 출력 형식을 고정해야 할 때
+### When: you need to fix the model's role, tone, or output format
 
 ```python
 from google import genai
@@ -104,7 +104,7 @@ response = client.models.generate_content(
 print(response.text)
 ```
 
-### 멀티턴 채팅에서의 시스템 지시
+### System Instruction in Multi-turn Chat
 
 ```python
 chat = client.chats.create(
@@ -118,16 +118,16 @@ response = chat.send_message("What are the benefits of exercise?")
 print(response.text)
 ```
 
-> **원칙:** 시스템 지시는 `GenerateContentConfig.system_instruction`에 설정한다.
-> 프롬프트 앞에 직접 붙이지 않는다.
+> **Rule:** Set system instruction via `GenerateContentConfig.system_instruction`.
+> Do not prepend it directly to the prompt.
 
 ---
 
-## § 3. 함수 호출 (Function Calling)
+## § 3. Function Calling
 
-### 언제: 외부 API, 데이터베이스, 실시간 정보를 모델과 연결해야 할 때
+### When: you need to connect external APIs, databases, or real-time data to the model
 
-### Step 1: 함수 선언
+### Step 1: Declare the Function
 
 ```python
 from google import genai
@@ -152,7 +152,7 @@ get_weather_func = types.FunctionDeclaration(
 )
 ```
 
-### Step 2: 모델에 도구 전달 및 함수 호출 응답 수신
+### Step 2: Pass Tool to Model and Receive Function Call
 
 ```python
 response = client.models.generate_content(
@@ -168,18 +168,18 @@ print(function_call.name)   # "get_current_weather"
 print(function_call.args)   # {"location": "Seoul"}
 ```
 
-### Step 3: 함수 실행 → 결과 반환
+### Step 3: Execute Function and Return Result
 
 ```python
-# 실제 함수 실행 (예시)
+# Execute the actual function (example)
 api_result = {"location": "Seoul", "temperature": 15, "condition": "Cloudy"}
 
-# 결과를 모델에 반환
+# Return result to the model
 final_response = client.models.generate_content(
     model="gemini-2.5-flash",
     contents=[
         types.Content(role="user", parts=[types.Part(text="What is the weather in Seoul?")]),
-        response.candidates[0].content,  # 모델의 함수 호출 요청
+        response.candidates[0].content,  # model's function call request
         types.Content(
             role="user",
             parts=[
@@ -197,16 +197,16 @@ final_response = client.models.generate_content(
 print(final_response.text)
 ```
 
-> **원칙:**
-> - `response.function_calls`로 함수 호출 여부를 확인한다.
-> - 함수 결과는 반드시 `Part.from_function_response()`로 감싸서 반환한다.
-> - 한 요청에 최대 512개 함수 선언 가능.
+> **Rule:**
+> - Check `response.function_calls` to detect function call requests.
+> - Wrap function results with `Part.from_function_response()`.
+> - Up to 512 function declarations per request.
 
 ---
 
-## § 4. 구조화된 출력 (Controlled Output)
+## § 4. Structured Output
 
-### 언제: JSON 형식의 일관된 응답이 필요할 때 (파싱, 데이터 처리 등)
+### When: you need consistent JSON-formatted responses (for parsing, data processing, etc.)
 
 ```python
 from google import genai
@@ -242,26 +242,26 @@ print(data)
 # [{"name": "Apple", "price": 3.5, "in_stock": true}, ...]
 ```
 
-### 지원 타입
+### Supported Types
 
-| JSON Schema 타입 | Python 예시 |
-|-----------------|-------------|
-| `STRING` | 문자열 |
-| `NUMBER` | 정수/실수 |
+| JSON Schema Type | Example |
+|-----------------|---------|
+| `STRING` | string value |
+| `NUMBER` | integer or float |
 | `BOOLEAN` | True/False |
-| `ARRAY` | 리스트 |
-| `OBJECT` | 딕셔너리 |
+| `ARRAY` | list |
+| `OBJECT` | dictionary |
 
-> **원칙:**
-> - `response_mime_type`은 반드시 `"application/json"`으로 설정한다.
-> - `required` 필드를 명시해야 모델이 해당 필드를 반드시 채운다.
-> - 응답은 `json.loads(response.text)`로 파싱한다.
+> **Rule:**
+> - `response_mime_type` must be `"application/json"`.
+> - Declare `required` fields so the model always populates them.
+> - Parse the response with `json.loads(response.text)`.
 
 ---
 
-## § 5. 생성 파라미터 (Generation Parameters)
+## § 5. Generation Parameters
 
-### 언제: 응답의 창의성, 길이, 반복성을 조절해야 할 때
+### When: you need to control creativity, length, or repetition of responses
 
 ```python
 from google import genai
@@ -273,37 +273,37 @@ response = client.models.generate_content(
     model="gemini-2.5-flash",
     contents="Write a creative story about a robot.",
     config=GenerateContentConfig(
-        temperature=1.0,          # 0.0(결정적) ~ 2.0(창의적). 기본값 1.0 권장
-        top_p=0.95,               # 누적 확률 임계값. temperature와 함께 사용
-        top_k=20,                 # 상위 K개 토큰만 고려
-        max_output_tokens=500,    # 최대 출력 토큰 수 (100토큰 ≈ 60~80 단어)
-        stop_sequences=["END"],   # 이 문자열 등장 시 생성 중단
-        seed=42,                  # 재현 가능한 출력을 위한 시드
-        presence_penalty=0.0,     # 이미 등장한 토큰 억제 (-2.0 ~ 2.0)
-        frequency_penalty=0.0,    # 반복 토큰 억제 (-2.0 ~ 2.0)
+        temperature=1.0,          # 0.0 (deterministic) ~ 2.0 (creative). Default 1.0 recommended
+        top_p=0.95,               # cumulative probability threshold; use alongside temperature
+        top_k=20,                 # consider only top K tokens
+        max_output_tokens=500,    # maximum output tokens (100 tokens ≈ 60–80 words)
+        stop_sequences=["END"],   # stop generation when this string appears
+        seed=42,                  # seed for reproducible output
+        presence_penalty=0.0,     # penalize already-seen tokens (-2.0 ~ 2.0)
+        frequency_penalty=0.0,    # penalize repeated tokens (-2.0 ~ 2.0)
     ),
 )
 print(response.text)
 ```
 
-### 파라미터 선택 가이드
+### Parameter Selection Guide
 
-| 목적 | 설정 |
-|------|------|
-| 정확한 사실 기반 응답 | `temperature=0.0` |
-| 일반적인 대화 | `temperature=1.0` (기본값) |
-| 창의적 글쓰기 | `temperature=1.5~2.0` |
-| 응답 길이 제한 | `max_output_tokens=200` |
-| 반복 억제 | `frequency_penalty=0.5~1.0` |
+| Goal | Setting |
+|------|---------|
+| Factual, precise responses | `temperature=0.0` |
+| General conversation | `temperature=1.0` (default) |
+| Creative writing | `temperature=1.5~2.0` |
+| Limit response length | `max_output_tokens=200` |
+| Suppress repetition | `frequency_penalty=0.5~1.0` |
 
-> **원칙:** 모든 파라미터는 `GenerateContentConfig`에 한 번에 설정한다.
-> `temperature`와 `top_p`는 함께 사용 시 상호작용하므로 하나씩 조정한다.
+> **Rule:** Set all parameters in `GenerateContentConfig` at once.
+> `temperature` and `top_p` interact — adjust one at a time.
 
 ---
 
-## § 6. 코드 실행 (Code Execution)
+## § 6. Code Execution
 
-### 언제: 수학 계산, 데이터 처리, 알고리즘 검증을 모델이 직접 실행해야 할 때
+### When: the model needs to directly run math calculations, data processing, or algorithm verification
 
 ```python
 from google import genai
@@ -325,28 +325,28 @@ response = client.models.generate_content(
     ),
 )
 
-# 모델이 생성한 코드
+# Code generated by the model
 print(response.executable_code)
 
-# 코드 실행 결과
+# Code execution result
 print(response.code_execution_result)
 
-# 최종 텍스트 응답
+# Final text response
 print(response.text)
 ```
 
-### 사전 설치된 라이브러리
+### Pre-installed Libraries
 
-`numpy`, `pandas`, `matplotlib`, `sympy` 등 주요 과학 라이브러리가 기본 포함됨.
-커스텀 패키지 설치는 불가.
+`numpy`, `pandas`, `matplotlib`, `sympy`, and other major scientific libraries are included.
+Custom package installation is not supported.
 
-### Function Calling과의 차이
+### Code Execution vs Function Calling
 
 | | Code Execution | Function Calling |
 |--|---------------|-----------------|
-| 실행 주체 | API 백엔드 (격리 환경) | 내 애플리케이션 |
-| 용도 | 계산, 알고리즘 | 외부 API, DB 연동 |
-| 라이브러리 | 사전 설치된 것만 | 제한 없음 |
-| 단일 요청 완결 | O | X (루프 필요) |
+| Executor | API backend (sandboxed) | Your application |
+| Use case | Computation, algorithms | External APIs, databases |
+| Libraries | Pre-installed only | Unlimited |
+| Single-request complete | Yes | No (loop required) |
 
-> **원칙:** 외부 서비스 연동이 필요 없는 순수 계산/데이터 처리는 Code Execution을 우선 사용한다.
+> **Rule:** For pure computation or data processing that doesn't need external services, prefer Code Execution.
